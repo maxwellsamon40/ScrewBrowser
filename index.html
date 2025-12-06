@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonic Sculptor - Audio Modifier</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <custom-navbar></custom-navbar>
+    
+    <main class="container mx-auto px-4 py-8">
+        <div class="max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden p-6">
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">Sonic Sculptor</h1>
+            <p class="text-gray-600 text-center mb-8">Transform your audio files with pitch, speed, and more!</p>
+            
+            <div class="space-y-6">
+                <!-- File Upload -->
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                    <input type="file" id="audioUpload" accept="audio/*" class="hidden">
+                    <label for="audioUpload" class="cursor-pointer flex flex-col items-center">
+                        <i data-feather="upload" class="w-12 h-12 text-indigo-500 mb-3"></i>
+                        <span class="text-lg font-medium text-gray-700">Upload Audio File</span>
+                        <span class="text-sm text-gray-500 mt-1">MP3, M4A, WAV, etc.</span>
+                    </label>
+                    <p id="fileName" class="text-sm text-gray-500 mt-2 hidden"></p>
+                </div>
+                <!-- Original Audio Player -->
+                <div id="audioPlayerContainer" class="hidden custom-audio-player">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Original Audio</h3>
+                    <div class="player-controls">
+                        <button id="playPauseBtn" class="player-btn">
+                            <i data-feather="play" class="w-4 h-4"></i>
+                        </button>
+                        <span id="currentTime" class="time-display">0:00</span>
+                        <div class="progress-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                            <div class="progress-handle"></div>
+                        </div>
+                        <span id="duration" class="time-display">0:00</span>
+                    </div>
+                    <audio id="audioPlayer"></audio>
+                </div>
+
+                <!-- Modified Audio Player -->
+                <div id="modifiedAudioPlayerContainer" class="hidden custom-audio-player mt-6">
+                    <h3 class="text-sm font-medium text-gray-700 mb-2">Modified Audio</h3>
+                    <div class="player-controls">
+                        <button id="modifiedPlayPauseBtn" class="player-btn">
+                            <i data-feather="play" class="w-4 h-4"></i>
+                        </button>
+                        <span id="modifiedCurrentTime" class="time-display">0:00</span>
+                        <div class="progress-container">
+                            <div class="modified-progress-bar" id="modifiedProgressBar"></div>
+                            <div class="progress-handle"></div>
+                        </div>
+                        <span id="modifiedDuration" class="time-display">0:00</span>
+                    </div>
+                    <audio id="modifiedAudioPlayer"></audio>
+                </div>
+<!-- Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Pitch Control -->
+                    <div>
+                        <label for="pitchControl" class="block text-sm font-medium text-gray-700 mb-1">Pitch</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="pitchControl" min="-12" max="12" value="0" step="0.1" class="w-full">
+                            <span id="pitchValue" class="text-sm font-medium text-gray-700 w-12 text-center">0.0</span>
+                        </div>
+                    </div>
+<!-- Speed Control -->
+                    <div>
+                        <label for="speedControl" class="block text-sm font-medium text-gray-700 mb-1">Speed</label>
+                        <div class="flex items-center space-x-3">
+                            <input type="range" id="speedControl" min="0.5" max="2" value="1" step="0.1" class="w-full">
+                            <span id="speedValue" class="text-sm font-medium text-gray-700 w-8 text-center">1.0x</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Advanced Options -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center justify-between cursor-pointer" id="advancedToggle">
+                        <h3 class="font-medium text-gray-700">Advanced Options</h3>
+                        <i data-feather="chevron-down" class="text-gray-500"></i>
+                    </div>
+                    <div id="advancedOptions" class="mt-3 space-y-4 hidden">
+                        <div>
+                            <label for="reverseAudio" class="flex items-center space-x-2">
+                                <input type="checkbox" id="reverseAudio" class="rounded text-indigo-600">
+                                <span>Reverse Audio</span>
+                            </label>
+                        </div>
+                        <div>
+                            <label for="echoEffect" class="flex items-center space-x-2">
+                                <input type="checkbox" id="echoEffect" class="rounded text-indigo-600">
+                                <span>Echo Effect</span>
+                            </label>
+                        </div>
+                        <!-- New audio format and volume controls -->
+                        <div>
+                            <label for="audioFormat" class="block text-sm font-medium text-gray-700 mb-1">Output Format</label>
+                            <select id="audioFormat" class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                <option value="wav">WAV (Best Quality)</option>
+                                <option value="mp3">MP3 (Smaller Size)</option>
+                                <option value="ogg">OGG (Web Optimized)</option>
+                                <option value="flac">FLAC (Lossless)</option>
+                                <option value="aac">AAC (Mobile Friendly)</option>
+</select>
+                        </div>
+                        <div>
+                            <label for="volumeControl" class="block text-sm font-medium text-gray-700 mb-1">Volume</label>
+                            <div class="flex items-center space-x-3">
+                                <input type="range" id="volumeControl" min="0" max="100" value="100" class="w-full">
+                                <span id="volumeValue" class="text-sm font-medium text-gray-700 w-12 text-center">100%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+<!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center gap-3">
+                    <button id="playBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 disabled:bg-indigo-300 disabled:cursor-not-allowed" disabled>
+                        <i data-feather="play" class="mr-2 inline"></i> Play
+                    </button>
+                    <button id="pauseBtn" class="px-6 py-2 bg-indigo-500 text-white rounded-lg font-medium hover:bg-indigo-600 disabled:bg-indigo-200 disabled:cursor-not-allowed" disabled>
+                        <i data-feather="pause" class="mr-2 inline"></i> Pause
+                    </button>
+<button id="processBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed" disabled>
+                        <i data-feather="refresh-cw" class="mr-2 inline"></i> Process
+                    </button>
+                    <button id="downloadBtn" class="px-6 py-2 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700 disabled:bg-purple-300 disabled:cursor-not-allowed" disabled>
+                        <i data-feather="download" class="mr-2 inline"></i> Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <custom-footer></custom-footer>
+    
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script src="script.js"></script>
+    <script>
+        feather.replace();
+    </script>
+<script src="https://huggingface.co/deepsite/deepsite-badge.js"></script>
+</body>
+</html>
