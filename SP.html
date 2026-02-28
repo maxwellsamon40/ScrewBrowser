@@ -446,7 +446,7 @@
         };
 
         function bufferToWav(buffer) {
-            cost numOfChan = buffer.numberOfChannels;
+            const numOfChan = buffer.numberOfChannels;
             const length = buffer.length * numOfChan * 2 + 44;
             const bufferArray = new ArrayBuffer(length);
             const view = new DataView(bufferArray);
