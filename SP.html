@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScrewBrowser - Chopped & Screwed Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+        
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #050508;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(139, 92, 246, 0.3); border-radius: 10px; }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 4px;
+            background: #8b5cf6;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.6);
+        }
+
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: #1e1b4b;
+            border-radius: 2px;
+        }
+
+        .animate-spin-slow { animation: spin 6s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .glass-panel {
+            background: rgba(10, 10, 20, 0.6);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(139, 92, 246, 0.1);
+        }
+
+        #welcome-modal {
+            display: none;
+        }
+
+        .screw-glow {
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="p-4 md:p-10 flex flex-col items-center">
+
+    <!-- Modal de Boas-vindas ScrewBrowser -->
+    <div id="welcome-modal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-xl bg-black/80">
+        <div class="bg-[#0a0a14] border border-violet-500/20 rounded-[2.5rem] max-w-lg w-full p-8 md:p-12 shadow-[0_0_80px_rgba(139,92,246,0.15)] relative">
+            <div class="flex flex-col items-center text-center space-y-8">
+                <div class="w-20 h-20 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-violet-600/30 rotate-3">
+                    <i data-lucide="disc" class="text-white w-10 h-10 animate-spin-slow"></i>
+                </div>
+                
+                <div class="space-y-3">
+                    <h2 class="text-4xl font-bold tracking-tighter italic uppercase text-white screw-glow">ScrewBrowser</h2>
+                    <p class="text-violet-400 text-[10px] font-bold uppercase tracking-[0.3em]">O Teu Laboratório de Som Abrandado</p>
+                </div>
+
+                <div class="w-full space-y-4 text-left">
+                    <div class="flex gap-5 p-5 rounded-3xl bg-violet-500/5 border border-violet-500/10">
+                        <i data-lucide="waves" class="text-violet-500 w-6 h-6"></i>
+                        <div>
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-slate-200">Chopped & Screwed</h4>
+                            <p class="text-[11px] text-slate-500">Altera o pitch e a velocidade para criar texturas atmosféricas.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-5 p-5 rounded-3xl bg-violet-500/5 border border-violet-500/10">
+                        <i data-lucide="save" class="text-fuchsia-500 w-6 h-6"></i>
+                        <div>
+                            <h4 class="text-xs font-bold uppercase tracking-widest text-slate-200">Exportação Multi-Formato</h4>
+                            <p class="text-[11px] text-slate-500">Grava em WAV, MP3 ou OGG com um clique.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="closeWelcome()" class="w-full py-5 bg-violet-600 text-white rounded-2xl font-bold uppercase tracking-widest hover:bg-violet-500 transition-all shadow-xl shadow-violet-600/20 active:scale-95">
+                    Entrar no Estúdio
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Coluna Esquerda: Player -->
+        <div class="lg:col-span-8 space-y-6">
+            <div class="glass-panel rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
+                <header class="flex justify-between items-center mb-12">
+                    <div class="flex items-center gap-5">
+                        <div class="bg-violet-600 p-4 rounded-2xl shadow-lg shadow-violet-600/20">
+                            <i data-lucide="audio-lines" class="text-white w-7 h-7"></i>
+                        </div>
+                        <div>
+                            <h1 class="text-3xl font-bold tracking-tighter italic screw-glow">SCREWBROWSER</h1>
+                            <p class="text-[10px] font-bold text-violet-400 uppercase tracking-[0.2em]">Screwed & Reverb Engine</p>
+                        </div>
+                    </div>
+                    <label class="cursor-pointer bg-white/5 hover:bg-violet-600/20 p-4 rounded-2xl transition-all border border-white/5 group">
+                        <i data-lucide="plus" class="w-6 h-6 text-slate-400 group-hover:text-violet-400"></i>
+                        <input type="file" id="file-upload" multiple accept="audio/*" class="hidden">
+                    </label>
+                </header>
+
+                <div id="player-ui" class="hidden space-y-12">
+                    <div class="text-center py-6">
+                        <span id="reverse-badge" class="hidden text-[9px] bg-fuchsia-600 text-white px-3 py-1 rounded-full font-bold animate-pulse tracking-widest mb-4 inline-block">REVERSE MODE</span>
+                        <h2 id="current-track-name" class="text-2xl font-medium truncate max-w-md mx-auto text-slate-200">Seleciona uma faixa</h2>
+                    </div>
+
+                    <!-- Progress -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between text-[11px] font-bold text-slate-500 tabular-nums">
+                            <span id="time-current">0:00</span>
+                            <span id="time-duration">0:00</span>
+                        </div>
+                        <div class="relative group">
+                            <input type="range" id="progress-slider" min="0" value="0" step="0.01" class="w-full relative z-10">
+                        </div>
+                    </div>
+
+                    <!-- Parametros de Manipulação -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="space-y-5">
+                            <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                <span class="flex items-center gap-2"><i data-lucide="chevrons-down" class="w-3 h-3"></i> Pitch</span>
+                                <span id="pitch-val" class="text-violet-400 font-mono">1.00x</span>
+                            </div>
+                            <input type="range" id="pitch-slider" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
+                        </div>
+                        <div class="space-y-5">
+                            <div class="flex justify-between text-[11px] font-bold text-slate-400 uppercase tracking-widest">
+                                <span class="flex items-center gap-2"><i data-lucide="timer" class="w-3 h-3"></i> Velocidade</span>
+                                <span id="speed-val" class="text-fuchsia-400 font-mono">1.00x</span>
+                            </div>
+                            <input type="range" id="speed-slider" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
+                        </div>
+                    </div>
+
+                    <!-- Deck de Controlo -->
+                    <div class="flex flex-wrap items-center justify-center gap-8 pt-6">
+                        <button id="loop-btn" class="p-5 rounded-2xl bg-white/5 text-slate-500 hover:text-violet-400 transition-all border border-transparent hover:border-violet-500/20" title="Loop">
+                            <i data-lucide="repeat" class="w-6 h-6"></i>
+                        </button>
+                        <button id="prev-btn" class="p-6 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all">
+                            <i data-lucide="rewind" class="w-8 h-8 fill-current"></i>
+                        </button>
+                        <button id="play-pause-btn" class="h-28 w-28 rounded-[2rem] bg-violet-600 text-white flex items-center justify-center hover:bg-violet-500 transition-all shadow-2xl shadow-violet-600/30 active:scale-90">
+                            <i data-lucide="play" id="play-icon" class="w-12 h-12 ml-1 fill-current"></i>
+                        </button>
+                        <button id="next-btn" class="p-6 rounded-2xl bg-white/5 text-white hover:bg-white/10 transition-all">
+                            <i data-lucide="fast-forward" class="w-8 h-8 fill-current"></i>
+                        </button>
+                        <button id="reverse-btn" class="p-5 rounded-2xl bg-white/5 text-slate-500 hover:text-fuchsia-400 transition-all border border-transparent hover:border-fuchsia-500/20" title="Inverter">
+                            <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+
+                    <!-- Exportação e Volume -->
+                    <div class="flex flex-col md:flex-row items-center gap-8 justify-center pt-4">
+                        <div class="flex items-center gap-4 bg-black/60 px-8 py-4 rounded-3xl flex-1 max-w-sm border border-white/5">
+                            <i data-lucide="volume-low" class="w-5 h-5 text-slate-500"></i>
+                            <input type="range" id="volume-slider" min="0" max="1.5" step="0.01" value="1.00" class="flex-1">
+                            <i data-lucide="volume-2" class="w-5 h-5 text-slate-500"></i>
+                        </div>
+                        
+                        <div class="flex items-center gap-3 bg-violet-500/10 p-2 rounded-3xl border border-violet-500/20">
+                            <select id="export-format" class="bg-transparent text-[10px] font-bold uppercase text-violet-300 px-4 outline-none cursor-pointer">
+                                <option value="wav">WAV</option>
+                                <option value="mp3">MP3</option>
+                                <option value="ogg">OGG</option>
+                            </select>
+                            <button id="export-btn" class="bg-violet-600 hover:bg-violet-500 text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all flex items-center gap-3 shadow-lg shadow-violet-900/20 active:scale-95">
+                                <i data-lucide="download-cloud" class="w-4 h-4"></i>
+                                Gravar Mix
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Estado Vazio -->
+                <div id="empty-ui" class="py-28 text-center space-y-8">
+                    <div class="w-24 h-24 bg-violet-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-violet-500/20 shadow-inner">
+                        <i data-lucide="disc" class="w-12 h-12 text-violet-500 animate-spin-slow"></i>
+                    </div>
+                    <div class="space-y-2">
+                        <h3 class="text-2xl font-bold text-slate-400 uppercase tracking-widest italic">ScrewBrowser Offline</h3>
+                        <p class="text-sm text-slate-600 max-w-xs mx-auto">Carrega os teus sons para começar a abrandar a realidade.</p>
+                    </div>
+                    <button onclick="document.getElementById('file-upload').click()" class="bg-violet-600 px-10 py-5 rounded-2xl text-xs font-bold uppercase tracking-[0.3em] hover:bg-violet-500 transition-all shadow-2xl shadow-violet-600/30 active:scale-95">
+                        Importar Áudio
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Coluna Direita: Sidebar -->
+        <div class="lg:col-span-4 space-y-6">
+            <div class="glass-panel rounded-[2.5rem] p-8 flex flex-col h-[420px] shadow-xl">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center gap-3">
+                        <i data-lucide="library" class="text-violet-400 w-5 h-5"></i>
+                        <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400">Biblioteca</h3>
+                    </div>
+                    <span id="track-count" class="text-[9px] bg-violet-600/20 text-violet-400 px-2 py-0.5 rounded font-bold">0</span>
+                </div>
+                <div id="playlist-container" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                    <!-- Faixas aparecem aqui -->
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-[2.5rem] p-8 flex flex-col h-[300px] shadow-xl">
+                <div class="flex items-center gap-3 mb-8">
+                    <i data-lucide="check-circle-2" class="text-emerald-400 w-5 h-5"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400">Masterizados</h3>
+                </div>
+                <div id="history-container" class="flex-1 overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                    <!-- Histórico de exportações -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Estado Global ---
+        let playlist = [];
+        let currentIndex = -1;
+        let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let sourceNode = null;
+        let gainNode = null;
+        let originalBuffer = null;
+        let activeBuffer = null;
+        let isPlaying = false;
+        let isLooping = false;
+        let isReverse = false;
+        let startTime = 0;
+        let offset = 0;
+        let speed = 1.0;
+        let pitch = 1.0;
+        let volume = 1.0;
+        let animationFrame = null;
+
+        // --- Elementos DOM ---
+        const playBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const fileUpload = document.getElementById('file-upload');
+        const playlistContainer = document.getElementById('playlist-container');
+        const historyContainer = document.getElementById('history-container');
+        const pitchSlider = document.getElementById('pitch-slider');
+        const speedSlider = document.getElementById('speed-slider');
+        const volumeSlider = document.getElementById('volume-slider');
+        const progressSlider = document.getElementById('progress-slider');
+        const playerUI = document.getElementById('player-ui');
+        const emptyUI = document.getElementById('empty-ui');
+
+        // --- Inicialização ---
+        window.onload = () => {
+            lucide.createIcons();
+            if (!localStorage.getItem('screwbrowser_visited')) {
+                document.getElementById('welcome-modal').style.display = 'flex';
+            }
+        };
+
+        function closeWelcome() {
+            document.getElementById('welcome-modal').style.display = 'none';
+            localStorage.setItem('screwbrowser_visited', 'true');
+        }
+
+        // --- Gestão de Ficheiros ---
+        fileUpload.addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            files.forEach(file => {
+                playlist.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    name: file.name,
+                    file: file
+                });
+            });
+            updateTrackCount();
+            renderPlaylist();
+            if (currentIndex === -1) loadTrack(0);
+        });
+
+        async function loadTrack(index) {
+            if (index < 0 || index >= playlist.length) return;
+            
+            stopAudio();
+            currentIndex = index;
+            isReverse = false;
+            resetUIReverse();
+
+            const item = playlist[index];
+            document.getElementById('current-track-name').innerText = item.name;
+            
+            const arrayBuffer = await item.file.arrayBuffer();
+            originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+            activeBuffer = originalBuffer;
+
+            progressSlider.max = activeBuffer.duration;
+            document.getElementById('time-duration').innerText = formatTime(activeBuffer.duration);
+            
+            offset = 0;
+            updateProgressUI(0);
+            
+            emptyUI.classList.add('hidden');
+            playerUI.classList.remove('hidden');
+            renderPlaylist();
+        }
+
+        function updateTrackCount() {
+            document.getElementById('track-count').innerText = playlist.length;
+        }
+
+        function resetUIReverse() {
+            document.getElementById('reverse-btn').classList.remove('bg-fuchsia-600/20', 'border-fuchsia-500', 'text-fuchsia-400');
+            document.getElementById('reverse-badge').classList.add('hidden');
+        }
+
+        function renderPlaylist() {
+            playlistContainer.innerHTML = '';
+            playlist.forEach((item, idx) => {
+                const isActive = idx === currentIndex;
+                const div = document.createElement('div');
+                div.className = `group flex items-center gap-4 p-5 rounded-3xl transition-all cursor-pointer border ${isActive ? 'bg-violet-600 border-transparent shadow-lg shadow-violet-600/20' : 'bg-white/5 border-transparent hover:border-white/10'}`;
+                div.onclick = () => loadTrack(idx);
+                
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-xl bg-black/20 flex items-center justify-center">
+                        <i data-lucide="${isActive && isPlaying ? 'volume-2' : 'music'}" class="w-4 h-4 ${isActive ? 'text-white' : 'text-slate-600'}"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-[12px] font-bold truncate ${isActive ? 'text-white' : 'text-slate-400'}">${item.name}</p>
+                    </div>
+                    <button onclick="event.stopPropagation(); removeTrack(${idx})" class="p-2 opacity-0 group-hover:opacity-100 transition-opacity ${isActive ? 'text-violet-200' : 'text-slate-700 hover:text-red-400'}">
+                        <i data-lucide="x" class="w-4 h-4"></i>
+                    </button>
+                `;
+                playlistContainer.appendChild(div);
+            });
+            lucide.createIcons();
+        }
+
+        function removeTrack(idx) {
+            playlist.splice(idx, 1);
+            if (idx === currentIndex) {
+                stopAudio();
+                currentIndex = -1;
+                playerUI.classList.add('hidden');
+                emptyUI.classList.remove('hidden');
+            } else if (idx < currentIndex) {
+                currentIndex--;
+            }
+            updateTrackCount();
+            renderPlaylist();
+        }
+
+        // --- Lógica de Áudio ---
+        function playAudio(fromTime = offset) {
+            if (!activeBuffer) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            stopAudio();
+
+            sourceNode = audioCtx.createBufferSource();
+            sourceNode.buffer = activeBuffer;
+            sourceNode.playbackRate.value = speed;
+            sourceNode.detune.value = (pitch - 1) * 1200;
+
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = volume;
+
+            sourceNode.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+
+            sourceNode.start(0, fromTime);
+            startTime = audioCtx.currentTime;
+            offset = fromTime;
+            isPlaying = true;
+            
+            playIcon.setAttribute('data-lucide', 'pause');
+            lucide.createIcons();
+            
+            requestAnimationFrame(tick);
+            renderPlaylist();
+        }
+
+        function stopAudio() {
+            if (sourceNode) {
+                try { sourceNode.stop(); } catch(e) {}
+                sourceNode = null;
+            }
+            isPlaying = false;
+            playIcon.setAttribute('data-lucide', 'play');
+            lucide.createIcons();
+            cancelAnimationFrame(animationFrame);
+            renderPlaylist();
+        }
+
+        function tick() {
+            if (!isPlaying) return;
+            const now = audioCtx.currentTime;
+            const elapsed = (now - startTime) * speed;
+            const currentPos = offset + elapsed;
+
+            if (currentPos >= activeBuffer.duration) {
+                if (isLooping) {
+                    playAudio(0);
+                } else {
+                    nextTrack();
+                }
+            } else {
+                updateProgressUI(currentPos);
+                animationFrame = requestAnimationFrame(tick);
+            }
+        }
+
+        function updateProgressUI(val) {
+            progressSlider.value = val;
+            document.getElementById('time-current').innerText = formatTime(val);
+        }
+
+        // --- Controlos de Interface ---
+        playBtn.onclick = () => isPlaying ? stopAudio() : playAudio();
+
+        pitchSlider.oninput = (e) => {
+            pitch = parseFloat(e.target.value);
+            document.getElementById('pitch-val').innerText = pitch.toFixed(2) + 'x';
+            if (sourceNode) sourceNode.detune.setTargetAtTime((pitch - 1) * 1200, audioCtx.currentTime, 0.1);
+        };
+
+        speedSlider.oninput = (e) => {
+            speed = parseFloat(e.target.value);
+            document.getElementById('speed-val').innerText = speed.toFixed(2) + 'x';
+            if (sourceNode) sourceNode.playbackRate.setTargetAtTime(speed, audioCtx.currentTime, 0.1);
+        };
+
+        volumeSlider.oninput = (e) => {
+            volume = parseFloat(e.target.value);
+            if (gainNode) gainNode.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.1);
+        };
+
+        progressSlider.oninput = (e) => {
+            const time = parseFloat(e.target.value);
+            offset = time;
+            if (isPlaying) playAudio(time);
+            else updateProgressUI(time);
+        };
+
+        document.getElementById('loop-btn').onclick = function() {
+            isLooping = !isLooping;
+            this.classList.toggle('text-violet-400');
+            this.classList.toggle('bg-violet-600/20');
+            this.classList.toggle('border-violet-500/30');
+        };
+
+        document.getElementById('reverse-btn').onclick = function() {
+            if (!originalBuffer) return;
+            const wasPlaying = isPlaying;
+            stopAudio();
+            
+            isReverse = !isReverse;
+            this.classList.toggle('bg-fuchsia-600/20');
+            this.classList.toggle('border-fuchsia-500/30');
+            this.classList.toggle('text-fuchsia-400');
+            document.getElementById('reverse-badge').classList.toggle('hidden');
+
+            const newTime = activeBuffer.duration - offset;
+            
+            if (isReverse) {
+                activeBuffer = reverseBuffer(originalBuffer);
+            } else {
+                activeBuffer = originalBuffer;
+            }
+
+            offset = newTime;
+            updateProgressUI(newTime);
+            if (wasPlaying) playAudio(newTime);
+        };
+
+        function reverseBuffer(buffer) {
+            const numChannels = buffer.numberOfChannels;
+            const newBuffer = audioCtx.createBuffer(numChannels, buffer.length, buffer.sampleRate);
+            for (let i = 0; i < numChannels; i++) {
+                const channelData = buffer.getChannelData(i);
+                const reversedData = newBuffer.getChannelData(i);
+                for (let j = 0, k = buffer.length - 1; j < buffer.length; j++, k--) {
+                    reversedData[j] = channelData[k];
+                }
+            }
+            return newBuffer;
+        }
+
+        document.getElementById('next-btn').onclick = nextTrack;
+        document.getElementById('prev-btn').onclick = () => loadTrack((currentIndex - 1 + playlist.length) % playlist.length);
+
+        function nextTrack() {
+            if (playlist.length > 0) loadTrack((currentIndex + 1) % playlist.length);
+        }
+
+        function formatTime(time) {
+            const m = Math.floor(time / 60);
+            const s = Math.floor(time % 60);
+            return m + ":" + (s < 10 ? "0" + s : s);
+        }
+
+        // --- Motor de Exportação ---
+        document.getElementById('export-btn').onclick = async function() {
+            if (!activeBuffer) return;
+            const format = document.getElementById('export-format').value;
+            const btn = this;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> A gravar...`;
+            lucide.createIcons();
+
+            const offlineCtx = new OfflineAudioContext(activeBuffer.numberOfChannels, activeBuffer.length / speed, activeBuffer.sampleRate);
+            const source = offlineCtx.createBufferSource();
+            source.buffer = activeBuffer;
+            source.playbackRate.value = speed;
+            source.detune.value = (pitch - 1) * 1200;
+            source.connect(offlineCtx.destination);
+            source.start(0);
+
+            const rendered = await offlineCtx.startRendering();
+            let blob;
+            let extension = format;
+
+            if (format === 'wav') {
+                blob = bufferToWav(rendered);
+            } else {
+                blob = await compressAudio(rendered, format);
+                extension = format === 'mp3' ? 'webm' : 'ogg'; 
+            }
+
+            const url = URL.createObjectURL(blob);
+            const fileName = `ScrewBrowser_${isReverse ? 'REV_' : ''}${playlist[currentIndex].name.split('.')[0]}.${extension === 'webm' ? 'mp3' : extension}`;
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+
+            addToHistory(fileName, format);
+            
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="download-cloud" class="w-4 h-4"></i> Gravar Mix`;
+            lucide.createIcons();
+        };
+
+        async function compressAudio(buffer, format) {
+            const tempCtx = new AudioContext();
+            const source = tempCtx.createBufferSource();
+            source.buffer = buffer;
+            const dest = tempCtx.createMediaStreamDestination();
+            source.connect(dest);
+            
+            const mimeType = format === 'ogg' ? 'audio/ogg; codecs=vorbis' : 'audio/webm; codecs=opus';
+            const recorder = new MediaRecorder(dest.stream, { mimeType });
+            const chunks = [];
+
+            return new Promise(resolve => {
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    tempCtx.close();
+                    resolve(new Blob(chunks, { type: mimeType }));
+                };
+                recorder.start();
+                source.start(0);
+                source.onended = () => recorder.stop();
+            });
+        }
+
+        function addToHistory(name, format) {
+            const div = document.createElement('div');
+            div.className = "p-4 bg-white/5 rounded-2xl border border-white/5 space-y-2 text-left animate-in fade-in duration-500";
+            div.innerHTML = `
+                <p class="text-[11px] font-bold text-slate-300 truncate italic">${name}</p>
+                <div class="flex justify-between items-center text-[9px] font-bold uppercase tracking-widest">
+                    <span class="text-slate-600">${new Date().toLocaleTimeString()}</span>
+                    <div class="flex gap-2">
+                         <span class="text-violet-400">P ${pitch.toFixed(2)}</span>
+                         <span class="text-fuchsia-400">S ${speed.toFixed(2)}</span>
+                         <span class="bg-violet-600/20 text-violet-400 px-1.5 rounded">${format}</span>
+                    </div>
+                </div>
+            `;
+            historyContainer.prepend(div);
+        }
+
+        function bufferToWav(buffer) {
+            const numOfChan = buffer.numberOfChannels;
+            const length = buffer.length * numOfChan * 2 + 44;
+            const bufferArray = new ArrayBuffer(length);
+            const view = new DataView(bufferArray);
+            let pos = 0;
+            const setUint32 = (data) => { view.setUint32(pos, data, true); pos += 4; };
+            const setUint16 = (data) => { view.setUint16(pos, data, true); pos += 2; };
+            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
+            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
+            setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * numOfChan * 2);
+            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
+            setUint32(length - pos - 4);
+            for (let i = 0; i < buffer.length; i++) {
+                for (let channel = 0; channel < numOfChan; channel++) {
+                    let sample = buffer.getChannelData(channel)[i];
+                    sample = Math.max(-1, Math.min(1, sample));
+                    view.setInt16(pos, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    pos += 2;
+                }
+            }
+            return new Blob([bufferArray], { type: 'audio/wav' });
+        }
+    </script>
+</body>
+</html>
