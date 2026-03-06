@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ScrewBrowser - Custom Studio</title>
+    <title>ScrewBrowser</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -11,119 +11,123 @@
         
         :root {
             --bg-color: #050508;
-            --panel-bg: rgba(10, 10, 20, 0.6);
+            --panel-bg: rgba(10, 10, 20, 0.7);
             --text-main: #f1f5f9;
             --accent: #8b5cf6;
-            --accent-secondary: #d946ef;
-            --border: rgba(139, 92, 246, 0.1);
+            --border: rgba(139, 92, 246, 0.15);
         }
 
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: background 0.5s ease, color 0.5s ease;
+            min-height: 100vh;
         }
 
         .glass-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
             border: 1px solid var(--border);
-            transition: all 0.4s ease;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        /* Custom Range Styling */
-        input[type="range"] { -webkit-appearance: none; background: transparent; }
+        .theme-light {
+            --bg-color: #f1f5f9;
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --text-main: #0f172a;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        .theme-gradient {
+            background: linear-gradient(135deg, var(--grad-1, #6366f1), var(--grad-2, #a855f7)) fixed;
+        }
+
+        input[type="range"] { -webkit-appearance: none; background: transparent; cursor: pointer; }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 4px;
-            background: var(--accent); cursor: pointer; margin-top: -7px;
-            box-shadow: 0 0 15px var(--accent);
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--accent); margin-top: -6px; box-shadow: 0 0 10px var(--accent);
         }
         input[type="range"]::-webkit-slider-runnable-track {
             width: 100%; height: 4px; background: rgba(139, 92, 246, 0.2); border-radius: 2px;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        .theme-light {
-            --bg-color: #f8fafc;
-            --panel-bg: rgba(255, 255, 255, 0.8);
-            --text-main: #1e293b;
-            --border: rgba(0, 0, 0, 0.05);
-        }
-
-        .theme-gradient {
-            background: linear-gradient(135deg, var(--grad-1, #6366f1), var(--grad-2, #a855f7));
-            background-attachment: fixed;
-        }
-
-        .active-btn {
+        .active-mode {
             background: var(--accent) !important;
             color: white !important;
-            box-shadow: 0 0 20px var(--accent);
+            box-shadow: 0 0 15px var(--accent);
         }
+
+        .loading-shimmer {
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
     </style>
 </head>
-<body class="p-4 md:p-10 flex flex-col items-center min-h-screen">
+<body class="p-4 md:p-8 flex flex-col items-center">
 
-    <nav class="max-w-6xl w-full flex justify-between items-center mb-8 glass-panel p-4 rounded-3xl">
+    <nav class="max-w-6xl w-full flex flex-wrap justify-between items-center gap-4 mb-8 glass-panel p-4 rounded-3xl z-50">
         <div class="flex items-center gap-3">
-            <i data-lucide="disc" class="text-violet-500 animate-spin-slow"></i>
-            <span class="font-bold tracking-tighter italic text-xl">SCREWBROWSER</span>
+            <div class="p-2 bg-violet-600 rounded-lg">
+                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+            </div>
+            <span class="font-bold italic tracking-tighter text-lg">SCREWBROWSER</span>
         </div>
         
-        <div class="flex items-center gap-4">
-            <!-- Theme Selector -->
-            <div class="flex bg-black/10 p-1 rounded-xl border border-white/5">
-                <button onclick="setTheme('dark')" class="p-2 rounded-lg hover:bg-white/5" title="Escuro"><i data-lucide="moon" class="w-4 h-4"></i></button>
-                <button onclick="setTheme('light')" class="p-2 rounded-lg hover:bg-white/5" title="Claro"><i data-lucide="sun" class="w-4 h-4"></i></button>
+        <div class="flex items-center gap-3">
+            <div class="flex bg-black/20 p-1 rounded-xl border border-white/5">
+                <button onclick="setTheme('dark')" class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                <button onclick="setTheme('light')" class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="sun" class="w-4 h-4"></i></button>
                 <div class="relative group">
-                    <button class="p-2 rounded-lg hover:bg-white/5" title="Gradiente"><i data-lucide="palette" class="w-4 h-4"></i></button>
-                    <div class="hidden group-hover:flex absolute right-0 top-full mt-2 glass-panel p-3 rounded-xl flex-col gap-2 z-50">
-                        <input type="color" id="grad-color-1" value="#6366f1" onchange="updateGradient()" class="w-8 h-8 rounded cursor-pointer">
-                        <input type="color" id="grad-color-2" value="#a855f7" onchange="updateGradient()" class="w-8 h-8 rounded cursor-pointer">
+                    <button class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="palette" class="w-4 h-4"></i></button>
+                    <div class="hidden group-hover:flex absolute right-0 top-full mt-2 glass-panel p-3 rounded-xl flex-col gap-2 shadow-xl">
+                        <input type="color" id="grad-color-1" value="#4f46e5" onchange="updateGradient()" class="w-8 h-8 rounded border-none cursor-pointer">
+                        <input type="color" id="grad-color-2" value="#9333ea" onchange="updateGradient()" class="w-8 h-8 rounded border-none cursor-pointer">
                     </div>
                 </div>
             </div>
-            <label class="cursor-pointer bg-violet-600 px-4 py-2 rounded-xl text-xs font-bold uppercase text-white hover:bg-violet-500 transition-all shadow-lg shadow-violet-600/20">
-                <i data-lucide="plus" class="inline w-4 h-4 mr-1"></i> Add
+            <label class="cursor-pointer bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase transition-all flex items-center gap-2">
+                <i data-lucide="file-plus-2" class="w-4 h-4"></i> Importar
                 <input type="file" id="file-upload" multiple accept="audio/*" class="hidden">
             </label>
         </div>
     </nav>
 
-    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <div class="lg:col-span-8 space-y-6">
-            <div class="glass-panel rounded-[3rem] p-8 md:p-12 shadow-2xl relative overflow-hidden">
-                <div id="player-ui" class="hidden space-y-12">
+            <div class="glass-panel rounded-[2.5rem] p-6 md:p-10 relative overflow-hidden min-h-[500px] flex flex-col justify-center">
+                
+                <div id="player-ui" class="hidden space-y-10">
                     <div class="text-center">
-                        <h2 id="current-track-name" class="text-2xl font-medium truncate mb-2">A carregar som...</h2>
-                        <div class="flex justify-center gap-2">
-                            <span id="reverse-indicator" class="hidden text-[10px] bg-pink-600 text-white px-3 py-1 rounded-full font-bold uppercase">Reverso</span>
-                            <span id="loop-indicator" class="hidden text-[10px] bg-cyan-600 text-white px-3 py-1 rounded-full font-bold uppercase">Looping</span>
+                        <h2 id="current-track-name" class="text-xl md:text-2xl font-bold truncate max-w-lg mx-auto mb-4">Selecione uma faixa</h2>
+                        <div class="flex justify-center gap-3">
+                            <span id="badge-reverse" class="hidden px-3 py-1 bg-rose-600 text-white text-[10px] font-black rounded-full uppercase tracking-tighter">REVERSO</span>
+                            <span id="badge-loop" class="hidden px-3 py-1 bg-sky-600 text-white text-[10px] font-black rounded-full uppercase tracking-tighter">LOOP</span>
                         </div>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="flex justify-between text-[11px] font-bold opacity-50 tabular-nums">
-                            <span id="time-current">0:00</span>
-                            <span id="time-duration">0:00</span>
+                        <div class="flex justify-between text-[11px] font-mono opacity-60">
+                            <span id="time-current">00:00</span>
+                            <span id="time-duration">00:00</span>
                         </div>
                         <input type="range" id="progress-slider" min="0" value="0" step="0.01" class="w-full">
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
-                        <div class="space-y-4">
-                            <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-50">
                                 <span>Pitch Shift</span>
                                 <span id="pitch-val" class="text-violet-500">1.00x</span>
                             </div>
                             <input type="range" id="pitch-slider" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
                         </div>
-                        <div class="space-y-4">
-                            <div class="flex justify-between text-[11px] font-bold uppercase tracking-widest">
+                        <div class="space-y-3">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-50">
                                 <span>Velocidade</span>
                                 <span id="speed-val" class="text-fuchsia-500">1.00x</span>
                             </div>
@@ -131,61 +135,64 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center justify-center gap-6 pt-6">
-                        <button id="loop-btn" class="p-4 rounded-2xl bg-white/5 transition-all" title="Looping">
-                            <i data-lucide="repeat" class="w-6 h-6"></i>
+                    <div class="flex flex-wrap items-center justify-center gap-6 py-4">
+                        <button id="loop-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all"><i data-lucide="repeat" class="w-5 h-5"></i></button>
+                        <button id="prev-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
+                        <button id="play-pause-btn" class="h-20 w-20 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-xl active:scale-95 transition-transform">
+                            <i data-lucide="play" id="play-icon" class="w-8 h-8 fill-current"></i>
                         </button>
-                        <button id="prev-btn" class="p-4 rounded-2xl bg-white/5"><i data-lucide="skip-back" class="w-7 h-7"></i></button>
-                        <button id="play-pause-btn" class="h-24 w-24 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-2xl active:scale-90">
-                            <i data-lucide="play" id="play-icon" class="w-10 h-10 ml-1 fill-current"></i>
-                        </button>
-                        <button id="next-btn" class="p-4 rounded-2xl bg-white/5"><i data-lucide="skip-forward" class="w-7 h-7"></i></button>
-                        <button id="reverse-btn" class="p-4 rounded-2xl bg-white/5 transition-all" title="Reverso">
-                            <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
-                        </button>
+                        <button id="next-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
+                        <button id="reverse-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
                     </div>
 
-                    <div class="flex flex-col md:flex-row items-center gap-6">
-                        <div class="flex items-center gap-4 bg-black/10 px-6 py-4 rounded-3xl flex-1 w-full border border-white/5">
-                            <i data-lucide="volume-2" class="w-5 h-5 opacity-50"></i>
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <div class="flex items-center gap-4 bg-black/20 p-4 rounded-2xl flex-1 w-full border border-white/5">
+                            <i data-lucide="volume-2" class="w-4 h-4 opacity-40"></i>
                             <input type="range" id="volume-slider" min="0" max="1.5" step="0.01" value="1.00" class="flex-1">
                         </div>
-                        <div class="flex items-center gap-2">
-                            <select id="export-quality" class="bg-black/10 text-xs font-bold uppercase p-4 rounded-2xl border border-white/5 outline-none">
-                                <option value="high">HD (Lento)</option>
-                                <option value="mid" selected>Normal</option>
-                                <option value="low">Lo-Fi (Rápido)</option>
+                        <div class="flex gap-2 w-full sm:w-auto">
+                            <select id="export-quality" class="bg-black/20 text-[10px] font-bold p-4 rounded-2xl border border-white/5 outline-none flex-1 sm:flex-none">
+                                <option value="mid">NORMAL (32kHz)</option>
+                                <option value="low">LO-FI (22kHz Mono)</option>
+                                <option value="high">PRO (44kHz)</option>
                             </select>
-                            <button id="export-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase transition-all flex items-center gap-2">
+                            <button id="export-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2">
                                 <i data-lucide="download" class="w-4 h-4"></i> Download
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="empty-ui" class="py-20 text-center space-y-6">
-                    <div class="w-20 h-20 bg-violet-600/10 rounded-full flex items-center justify-center mx-auto border border-violet-600/20">
-                        <i data-lucide="audio-lines" class="w-10 h-10 text-violet-500"></i>
+                <div id="empty-ui" class="text-center space-y-6">
+                    <div class="w-24 h-24 bg-violet-600/10 rounded-full flex items-center justify-center mx-auto border border-violet-600/20">
+                        <i data-lucide="music" class="w-10 h-10 text-violet-500"></i>
                     </div>
-                    <h3 class="text-xl font-bold uppercase tracking-widest opacity-40">ScrewBrowser Estúdio</h3>
-                    <button onclick="document.getElementById('file-upload').click()" class="bg-violet-600 px-8 py-4 rounded-2xl text-xs font-bold uppercase tracking-widest text-white">Começar Sessão</button>
+                    <h3 class="text-lg font-bold uppercase tracking-widest opacity-30">Importe para começar</h3>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-4 space-y-6">
-            <div class="glass-panel rounded-[2.5rem] p-6 h-[400px] flex flex-col">
-                <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 opacity-50">Playlist</h3>
-                <div id="playlist-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar"></div>
+            <div class="glass-panel rounded-[2rem] p-6 h-[400px] flex flex-col">
+                <div class="flex items-center gap-2 mb-4 opacity-40">
+                    <i data-lucide="list-music" class="w-4 h-4"></i>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest">Lista de Reprodução</h3>
+                </div>
+                <div id="playlist-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2"></div>
             </div>
-            <div class="glass-panel rounded-[2.5rem] p-6 h-[250px] flex flex-col">
-                <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] mb-4 opacity-50">Downloads</h3>
-                <div id="history-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar"></div>
+            
+            <div class="glass-panel rounded-[2rem] p-6 h-[200px] flex flex-col">
+                <div class="flex items-center gap-2 mb-4 opacity-40">
+                    <i data-lucide="history" class="w-4 h-4"></i>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest">Histórico de Downloads</h3>
+                </div>
+                <div id="history-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2"></div>
             </div>
         </div>
     </main>
 
     <script>
+        // --- State Management ---
         let playlist = [];
         let currentIndex = -1;
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -203,87 +210,99 @@
         let volume = 1.0;
         let animationFrame = null;
 
-        // UI Elements
-        const playBtn = document.getElementById('play-pause-btn');
-        const playIcon = document.getElementById('play-icon');
-        const fileUpload = document.getElementById('file-upload');
-        const playlistContainer = document.getElementById('playlist-container');
-        const historyContainer = document.getElementById('history-container');
-        const pitchSlider = document.getElementById('pitch-slider');
-        const speedSlider = document.getElementById('speed-slider');
-        const volumeSlider = document.getElementById('volume-slider');
-        const progressSlider = document.getElementById('progress-slider');
-        const playerUI = document.getElementById('player-ui');
-        const emptyUI = document.getElementById('empty-ui');
+        const ui = {
+            playBtn: document.getElementById('play-pause-btn'),
+            playIcon: document.getElementById('play-icon'),
+            fileUpload: document.getElementById('file-upload'),
+            playlist: document.getElementById('playlist-container'),
+            history: document.getElementById('history-container'),
+            pitchSlider: document.getElementById('pitch-slider'),
+            speedSlider: document.getElementById('speed-slider'),
+            volumeSlider: document.getElementById('volume-slider'),
+            progressSlider: document.getElementById('progress-slider'),
+            playerUI: document.getElementById('player-ui'),
+            emptyUI: document.getElementById('empty-ui'),
+            trackName: document.getElementById('current-track-name'),
+            badgeReverse: document.getElementById('badge-reverse'),
+            badgeLoop: document.getElementById('badge-loop'),
+            timeCurrent: document.getElementById('time-current'),
+            timeDuration: document.getElementById('time-duration'),
+            exportBtn: document.getElementById('export-btn')
+        };
 
         window.onload = () => {
             lucide.createIcons();
             setTheme('dark');
         };
 
-        // --- Theme Logic ---
-        function setTheme(mode) {
+        // --- Themes ---
+        function setTheme(m) {
             document.body.classList.remove('theme-light', 'theme-gradient');
-            if(mode === 'light') document.body.classList.add('theme-light');
-            if(mode === 'gradient') document.body.classList.add('theme-gradient');
+            if(m === 'light') document.body.classList.add('theme-light');
+            if(m === 'gradient') document.body.classList.add('theme-gradient');
         }
 
         function updateGradient() {
             setTheme('gradient');
-            const c1 = document.getElementById('grad-color-1').value;
-            const c2 = document.getElementById('grad-color-2').value;
-            document.body.style.setProperty('--grad-1', c1);
-            document.body.style.setProperty('--grad-2', c2);
+            document.body.style.setProperty('--grad-1', document.getElementById('grad-color-1').value);
+            document.body.style.setProperty('--grad-2', document.getElementById('grad-color-2').value);
         }
 
-        // --- Core Audio Logic ---
-        fileUpload.addEventListener('change', async (e) => {
+        // --- Optimized File Handling ---
+        ui.fileUpload.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
-            for (const file of files) {
-                playlist.push({ id: Math.random().toString(36).substr(2, 9), name: file.name, file: file });
-            }
+            files.forEach(file => {
+                playlist.push({ id: crypto.randomUUID(), name: file.name, file: file });
+            });
             renderPlaylist();
             if (currentIndex === -1) loadTrack(0);
         });
 
-        async function loadTrack(index) {
-            if (index < 0 || index >= playlist.length) return;
+        async function loadTrack(idx) {
+            if (idx < 0 || idx >= playlist.length) return;
             stopAudio();
-            currentIndex = index;
+            currentIndex = idx;
+            const item = playlist[idx];
             
-            const item = playlist[index];
-            document.getElementById('current-track-name').innerText = item.name;
-            
-            const arrayBuffer = await item.file.arrayBuffer();
-            originalBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-            
-            // Re-apply reverse if it was active
-            activeBuffer = isReverse ? reverseBuffer(originalBuffer) : originalBuffer;
-
-            progressSlider.max = activeBuffer.duration;
-            document.getElementById('time-duration').innerText = formatTime(activeBuffer.duration);
-            offset = 0;
-            updateProgressUI(0);
-            
-            emptyUI.classList.add('hidden');
-            playerUI.classList.remove('hidden');
+            // UI instantânea enquanto processa
+            ui.trackName.innerText = item.name;
+            ui.emptyUI.classList.add('hidden');
+            ui.playerUI.classList.remove('hidden');
             renderPlaylist();
+
+            // Decode assíncrono para não travar a UI
+            try {
+                const arrayBuf = await item.file.arrayBuffer();
+                originalBuffer = await audioCtx.decodeAudioData(arrayBuf);
+                activeBuffer = isReverse ? reverseBuffer(originalBuffer) : originalBuffer;
+                
+                ui.progressSlider.max = activeBuffer.duration;
+                ui.timeDuration.innerText = formatTime(activeBuffer.duration);
+                offset = 0;
+                updateProgressUI(0);
+            } catch (err) {
+                console.error("Erro no decode:", err);
+            }
         }
 
         function renderPlaylist() {
-            playlistContainer.innerHTML = '';
+            ui.playlist.innerHTML = '';
             playlist.forEach((item, idx) => {
-                const isActive = idx === currentIndex;
+                const active = idx === currentIndex;
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-xl cursor-pointer flex justify-between items-center transition-all ${isActive ? 'bg-violet-600 text-white shadow-lg' : 'bg-white/5 hover:bg-white/10'}`;
+                div.className = `p-3 rounded-xl cursor-pointer flex justify-between items-center group transition-all ${active ? 'bg-violet-600 text-white' : 'bg-white/5 hover:bg-white/10'}`;
                 div.onclick = () => loadTrack(idx);
-                div.innerHTML = `<span class="text-xs font-bold truncate pr-2">${item.name}</span> <i data-lucide="${isActive && isPlaying ? 'volume-2' : 'play'}" class="w-3 h-3"></i>`;
-                playlistContainer.appendChild(div);
+                div.innerHTML = `
+                    <span class="text-[10px] font-bold truncate max-w-[80%]">${item.name}</span>
+                    <i data-lucide="${active && isPlaying ? 'pause' : 'play'}" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                `;
+                ui.playlist.appendChild(div);
             });
             lucide.createIcons();
         }
 
-        function playAudio(fromTime = offset) {
+        // --- Audio Logic ---
+        function playAudio(from = offset) {
             if (!activeBuffer) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
             stopAudio();
@@ -300,12 +319,12 @@
             sourceNode.connect(gainNode);
             gainNode.connect(audioCtx.destination);
 
-            sourceNode.start(0, fromTime);
+            sourceNode.start(0, from);
             startTime = audioCtx.currentTime;
-            offset = fromTime;
+            offset = from;
             isPlaying = true;
             
-            playIcon.setAttribute('data-lucide', 'pause');
+            ui.playIcon.setAttribute('data-lucide', 'pause');
             lucide.createIcons();
             requestAnimationFrame(tick);
         }
@@ -313,7 +332,7 @@
         function stopAudio() {
             if (sourceNode) { try { sourceNode.stop(); } catch(e) {} sourceNode = null; }
             isPlaying = false;
-            playIcon.setAttribute('data-lucide', 'play');
+            ui.playIcon.setAttribute('data-lucide', 'play');
             lucide.createIcons();
             cancelAnimationFrame(animationFrame);
         }
@@ -321,15 +340,10 @@
         function tick() {
             if (!isPlaying) return;
             const now = audioCtx.currentTime;
-            const elapsed = (now - startTime) * speed;
-            const currentPos = offset + elapsed;
+            const currentPos = offset + (now - startTime) * speed;
 
             if (currentPos >= activeBuffer.duration) {
-                if (isLooping) {
-                    playAudio(0);
-                } else {
-                    stopAudio();
-                }
+                if (isLooping) playAudio(0); else stopAudio();
             } else {
                 updateProgressUI(currentPos);
                 animationFrame = requestAnimationFrame(tick);
@@ -337,40 +351,35 @@
         }
 
         function updateProgressUI(val) {
-            progressSlider.value = val;
-            document.getElementById('time-current').innerText = formatTime(val);
+            ui.progressSlider.value = val;
+            ui.timeCurrent.innerText = formatTime(val);
         }
 
-        // --- Controls ---
-        playBtn.onclick = () => isPlaying ? stopAudio() : playAudio();
-        
-        pitchSlider.oninput = (e) => {
+        // --- Interaction Controls ---
+        ui.playBtn.onclick = () => isPlaying ? stopAudio() : playAudio();
+        ui.pitchSlider.oninput = (e) => {
             pitch = parseFloat(e.target.value);
             document.getElementById('pitch-val').innerText = pitch.toFixed(2) + 'x';
-            if (sourceNode) sourceNode.detune.setTargetAtTime((pitch - 1) * 1200, audioCtx.currentTime, 0.1);
+            if (sourceNode) sourceNode.detune.setTargetAtTime((pitch - 1) * 1200, audioCtx.currentTime, 0.05);
         };
-        
-        speedSlider.oninput = (e) => {
+        ui.speedSlider.oninput = (e) => {
             speed = parseFloat(e.target.value);
             document.getElementById('speed-val').innerText = speed.toFixed(2) + 'x';
-            if (sourceNode) sourceNode.playbackRate.setTargetAtTime(speed, audioCtx.currentTime, 0.1);
+            if (sourceNode) sourceNode.playbackRate.setTargetAtTime(speed, audioCtx.currentTime, 0.05);
         };
-
-        volumeSlider.oninput = (e) => {
+        ui.volumeSlider.oninput = (e) => {
             volume = parseFloat(e.target.value);
-            if (gainNode) gainNode.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.1);
+            if (gainNode) gainNode.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.05);
         };
-
-        progressSlider.oninput = (e) => {
+        ui.progressSlider.oninput = (e) => {
             offset = parseFloat(e.target.value);
             if (isPlaying) playAudio(offset); else updateProgressUI(offset);
         };
 
-        // --- Functional Logic: Looping & Reverse ---
         document.getElementById('loop-btn').onclick = function() {
             isLooping = !isLooping;
-            this.classList.toggle('active-btn', isLooping);
-            document.getElementById('loop-indicator').classList.toggle('hidden', !isLooping);
+            this.classList.toggle('active-mode', isLooping);
+            ui.badgeLoop.classList.toggle('hidden', !isLooping);
             if (sourceNode) sourceNode.loop = isLooping;
         };
 
@@ -378,48 +387,48 @@
             if (!originalBuffer) return;
             const wasPlaying = isPlaying;
             stopAudio();
-            
             isReverse = !isReverse;
-            this.classList.toggle('active-btn', isReverse);
-            document.getElementById('reverse-indicator').classList.toggle('hidden', !isReverse);
+            this.classList.toggle('active-mode', isReverse);
+            ui.badgeReverse.classList.toggle('hidden', !isReverse);
             
-            // Calculate relative offset for seamless reversal
-            const currentOffset = offset;
-            const newTime = originalBuffer.duration - currentOffset;
-            
+            const curTime = offset;
+            const reversedTime = originalBuffer.duration - curTime;
             activeBuffer = isReverse ? reverseBuffer(originalBuffer) : originalBuffer;
-            offset = newTime;
-            updateProgressUI(newTime);
-            
-            if (wasPlaying) playAudio(newTime);
+            offset = reversedTime;
+            updateProgressUI(reversedTime);
+            if (wasPlaying) playAudio(reversedTime);
         };
 
-        function reverseBuffer(buffer) {
-            const newBuffer = audioCtx.createBuffer(buffer.numberOfChannels, buffer.length, buffer.sampleRate);
-            for (let i = 0; i < buffer.numberOfChannels; i++) {
-                const data = buffer.getChannelData(i);
-                const rev = newBuffer.getChannelData(i);
-                for (let j = 0; j < buffer.length; j++) rev[j] = data[buffer.length - 1 - j];
+        function reverseBuffer(buf) {
+            const out = audioCtx.createBuffer(buf.numberOfChannels, buf.length, buf.sampleRate);
+            for (let i = 0; i < buf.numberOfChannels; i++) {
+                const data = buf.getChannelData(i);
+                const rev = out.getChannelData(i);
+                for (let j = 0; j < buf.length; j++) rev[j] = data[buf.length - 1 - j];
             }
-            return newBuffer;
+            return out;
         }
 
         document.getElementById('next-btn').onclick = () => loadTrack((currentIndex + 1) % playlist.length);
         document.getElementById('prev-btn').onclick = () => loadTrack((currentIndex - 1 + playlist.length) % playlist.length);
 
-        // --- Export Engine ---
-        document.getElementById('export-btn').onclick = async function() {
+        // --- Lag-Free Export (Background Processing) ---
+        ui.exportBtn.onclick = async function() {
             if (!activeBuffer) return;
             const quality = document.getElementById('export-quality').value;
             const btn = this;
-            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Rendering...`;
+            
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processando...`;
             lucide.createIcons();
 
-            let targetSR = 44100;
+            // Configuração
+            let targetSR = 32000; 
             let mono = false;
-            if(quality === 'mid') targetSR = 32000;
+            if(quality === 'high') targetSR = 44100;
             if(quality === 'low') { targetSR = 22050; mono = true; }
 
+            // OfflineContext corre numa thread separada do audio principal
             const offlineCtx = new OfflineAudioContext(mono ? 1 : 2, (activeBuffer.length/speed) * (targetSR/activeBuffer.sampleRate), targetSR);
             const source = offlineCtx.createBufferSource();
             source.buffer = activeBuffer;
@@ -429,43 +438,72 @@
             source.start(0);
 
             const rendered = await offlineCtx.startRendering();
+            
+            // Gerar o Blob WAV de forma otimizada
             const blob = bufferToWav(rendered);
             const url = URL.createObjectURL(blob);
+            const fileName = `Screw_${Date.now()}.wav`;
+            
             const a = document.createElement('a');
             a.href = url;
-            a.download = `ScrewBrowser_${quality.toUpperCase()}_${Date.now()}.wav`;
+            a.download = fileName;
             a.click();
-            
-            const div = document.createElement('div');
-            div.className = "p-2 bg-white/5 rounded-lg text-[9px] font-mono flex justify-between";
-            div.innerHTML = `<span>${a.download}</span> <span class="text-emerald-500">${(blob.size/1024/1024).toFixed(1)}MB</span>`;
-            historyContainer.prepend(div);
 
+            // Log de histórico
+            const log = document.createElement('div');
+            log.className = "p-2 bg-white/5 rounded-lg text-[9px] flex justify-between items-center";
+            log.innerHTML = `<span class="truncate pr-2">${fileName}</span> <span class="text-emerald-500 font-bold">${(blob.size/1024/1024).toFixed(1)}MB</span>`;
+            ui.history.prepend(log);
+
+            btn.disabled = false;
             btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i> Download`;
             lucide.createIcons();
         };
 
+        // Função síncrona otimizada para o worker principal
         function bufferToWav(buffer) {
-            const numOfChan = buffer.numberOfChannels;
-            const length = buffer.length * numOfChan * 2 + 44;
-            const bufferArray = new ArrayBuffer(length);
-            const view = new DataView(bufferArray);
-            let pos = 0;
-            const setUint32 = (d) => { view.setUint32(pos, d, true); pos += 4; };
-            const setUint16 = (d) => { view.setUint16(pos, d, true); pos += 2; };
-            setUint32(0x46464952); setUint32(length - 8); setUint32(0x45564157);
-            setUint32(0x20746d66); setUint32(16); setUint16(1); setUint16(numOfChan);
-            setUint32(buffer.sampleRate); setUint32(buffer.sampleRate * numOfChan * 2);
-            setUint16(numOfChan * 2); setUint16(16); setUint32(0x61746164);
-            setUint32(length - pos - 4);
+            const numChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const format = 1; // PCM
+            const bitDepth = 16;
+            const bytesPerSample = bitDepth / 8;
+            const blockAlign = numChannels * bytesPerSample;
+            const dataSize = buffer.length * blockAlign;
+            const headerSize = 44;
+            const fileSize = headerSize + dataSize;
+            const arrayBuffer = new ArrayBuffer(fileSize);
+            const view = new DataView(arrayBuffer);
+
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(0, 'RIFF');
+            view.setUint32(4, fileSize - 8, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, format, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * blockAlign, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bitDepth, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            let offset = 44;
             for (let i = 0; i < buffer.length; i++) {
-                for (let ch = 0; ch < numOfChan; ch++) {
-                    let s = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
-                    view.setInt16(pos, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
-                    pos += 2;
+                for (let channel = 0; channel < numChannels; channel++) {
+                    let sample = buffer.getChannelData(channel)[i];
+                    sample = Math.max(-1, Math.min(1, sample));
+                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                    offset += 2;
                 }
             }
-            return new Blob([bufferArray], { type: 'audio/wav' });
+            return new Blob([arrayBuffer], { type: 'audio/wav' });
         }
 
         function formatTime(t) {
@@ -475,4 +513,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
