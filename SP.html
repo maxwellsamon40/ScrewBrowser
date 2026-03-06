@@ -11,17 +11,17 @@
         
         :root {
             --bg-color: #050508;
-            --panel-bg: rgba(10, 10, 20, 0.7);
+            --panel-bg: rgba(10, 10, 25, 0.7);
             --text-main: #f1f5f9;
             --accent: #8b5cf6;
-            --border: rgba(139, 92, 246, 0.15);
+            --border: rgba(139, 92, 246, 0.2);
         }
 
         body {
             font-family: 'Space Grotesk', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-main);
-            transition: background 0.5s ease, color 0.5s ease;
+            transition: background 0.5s ease;
             min-height: 100vh;
         }
 
@@ -29,24 +29,23 @@
             background: var(--panel-bg);
             backdrop-filter: blur(30px);
             border: 1px solid var(--border);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .theme-light {
-            --bg-color: #f1f5f9;
+            --bg-color: #f8fafc;
             --panel-bg: rgba(255, 255, 255, 0.8);
             --text-main: #0f172a;
             --border: rgba(0, 0, 0, 0.1);
         }
 
         .theme-gradient {
-            background: linear-gradient(135deg, var(--grad-1, #6366f1), var(--grad-2, #a855f7)) fixed;
+            background: linear-gradient(135deg, var(--grad-1, #4f46e5), var(--grad-2, #9333ea)) fixed;
         }
 
         input[type="range"] { -webkit-appearance: none; background: transparent; cursor: pointer; }
         input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: var(--accent); margin-top: -6px; box-shadow: 0 0 10px var(--accent);
+            -webkit-appearance: none; height: 18px; width: 18px; border-radius: 6px;
+            background: var(--accent); margin-top: -8px; box-shadow: 0 0 15px var(--accent);
         }
         input[type="range"]::-webkit-slider-runnable-track {
             width: 100%; height: 4px; background: rgba(139, 92, 246, 0.2); border-radius: 2px;
@@ -55,79 +54,83 @@
         .active-mode {
             background: var(--accent) !important;
             color: white !important;
-            box-shadow: 0 0 15px var(--accent);
+            box-shadow: 0 0 20px var(--accent);
         }
 
-        .loading-shimmer {
-            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-slow { animation: pulse-slow 3s infinite; }
     </style>
 </head>
 <body class="p-4 md:p-8 flex flex-col items-center">
 
-    <nav class="max-w-6xl w-full flex flex-wrap justify-between items-center gap-4 mb-8 glass-panel p-4 rounded-3xl z-50">
-        <div class="flex items-center gap-3">
-            <div class="p-2 bg-violet-600 rounded-lg">
-                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+    <nav class="max-w-6xl w-full flex flex-wrap justify-between items-center gap-4 mb-8 glass-panel p-5 rounded-[2rem] z-50">
+        <div class="flex items-center gap-4">
+            <div class="p-3 bg-violet-600 rounded-2xl shadow-lg shadow-violet-900/40">
+                <i data-lucide="audio-waveform" class="text-white w-6 h-6"></i>
             </div>
-            <span class="font-bold italic tracking-tighter text-lg">SCREWBROWSER</span>
+            <div>
+                <span class="font-bold italic tracking-tighter text-xl block leading-none">SCREWBROWSER</span>
+                <span class="text-[9px] uppercase tracking-[0.3em] font-black opacity-40">Precision Engine</span>
+            </div>
         </div>
         
-        <div class="flex items-center gap-3">
-            <div class="flex bg-black/20 p-1 rounded-xl border border-white/5">
-                <button onclick="setTheme('dark')" class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="moon" class="w-4 h-4"></i></button>
-                <button onclick="setTheme('light')" class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="sun" class="w-4 h-4"></i></button>
+        <div class="flex items-center gap-4">
+            <div class="flex bg-black/20 p-1.5 rounded-2xl border border-white/5">
+                <button onclick="setTheme('dark')" class="p-2.5 rounded-xl hover:bg-white/10" title="Modo Escuro"><i data-lucide="moon" class="w-4 h-4"></i></button>
+                <button onclick="setTheme('light')" class="p-2.5 rounded-xl hover:bg-white/10" title="Modo Claro"><i data-lucide="sun" class="w-4 h-4"></i></button>
                 <div class="relative group">
-                    <button class="p-2 rounded-lg hover:bg-white/10"><i data-lucide="palette" class="w-4 h-4"></i></button>
-                    <div class="hidden group-hover:flex absolute right-0 top-full mt-2 glass-panel p-3 rounded-xl flex-col gap-2 shadow-xl">
-                        <input type="color" id="grad-color-1" value="#4f46e5" onchange="updateGradient()" class="w-8 h-8 rounded border-none cursor-pointer">
-                        <input type="color" id="grad-color-2" value="#9333ea" onchange="updateGradient()" class="w-8 h-8 rounded border-none cursor-pointer">
+                    <button class="p-2.5 rounded-xl hover:bg-white/10"><i data-lucide="palette" class="w-4 h-4"></i></button>
+                    <div class="hidden group-hover:flex absolute right-0 top-full mt-3 glass-panel p-4 rounded-2xl flex-col gap-3 shadow-2xl z-50 border-violet-500/30">
+                        <input type="color" id="grad-color-1" value="#6366f1" onchange="updateGradient()" class="w-10 h-10 rounded-lg border-none cursor-pointer">
+                        <input type="color" id="grad-color-2" value="#d946ef" onchange="updateGradient()" class="w-10 h-10 rounded-lg border-none cursor-pointer">
                     </div>
                 </div>
             </div>
-            <label class="cursor-pointer bg-violet-600 hover:bg-violet-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold uppercase transition-all flex items-center gap-2">
-                <i data-lucide="file-plus-2" class="w-4 h-4"></i> Importar
+            <label class="cursor-pointer bg-violet-600 hover:bg-violet-500 text-white px-6 py-3.5 rounded-2xl text-xs font-bold uppercase transition-all flex items-center gap-3 shadow-lg shadow-violet-900/20 active:scale-95">
+                <i data-lucide="plus-square" class="w-5 h-5"></i> Importar
                 <input type="file" id="file-upload" multiple accept="audio/*" class="hidden">
             </label>
         </div>
     </nav>
 
-    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <main class="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <div class="lg:col-span-8 space-y-6">
-            <div class="glass-panel rounded-[2.5rem] p-6 md:p-10 relative overflow-hidden min-h-[500px] flex flex-col justify-center">
+            <div class="glass-panel rounded-[3.5rem] p-8 md:p-12 relative overflow-hidden min-h-[550px] flex flex-col">
                 
-                <div id="player-ui" class="hidden space-y-10">
-                    <div class="text-center">
-                        <h2 id="current-track-name" class="text-xl md:text-2xl font-bold truncate max-w-lg mx-auto mb-4">Selecione uma faixa</h2>
-                        <div class="flex justify-center gap-3">
-                            <span id="badge-reverse" class="hidden px-3 py-1 bg-rose-600 text-white text-[10px] font-black rounded-full uppercase tracking-tighter">REVERSO</span>
-                            <span id="badge-loop" class="hidden px-3 py-1 bg-sky-600 text-white text-[10px] font-black rounded-full uppercase tracking-tighter">LOOP</span>
+                <div id="player-ui" class="hidden flex-1 flex flex-col justify-between space-y-10">
+                    <div class="text-center space-y-4">
+                        <h2 id="current-track-name" class="text-2xl md:text-3xl font-bold truncate max-w-xl mx-auto tracking-tight">Nome da Faixa</h2>
+                        <div class="flex justify-center gap-2">
+                            <span id="badge-reverse" class="hidden px-4 py-1.5 bg-fuchsia-600 text-white text-[9px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-fuchsia-900/20">Modo Reverso</span>
+                            <span id="badge-loop" class="hidden px-4 py-1.5 bg-cyan-500 text-white text-[9px] font-black rounded-full uppercase tracking-widest shadow-lg shadow-cyan-900/20">Loop Ativo</span>
                         </div>
                     </div>
 
                     <div class="space-y-4">
-                        <div class="flex justify-between text-[11px] font-mono opacity-60">
+                        <div class="flex justify-between text-[11px] font-bold opacity-40 tabular-nums uppercase tracking-widest">
                             <span id="time-current">00:00</span>
                             <span id="time-duration">00:00</span>
                         </div>
                         <input type="range" id="progress-slider" min="0" value="0" step="0.01" class="w-full">
                     </div>
 
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-50">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
                                 <span>Pitch Shift</span>
                                 <span id="pitch-val" class="text-violet-500">1.00x</span>
                             </div>
                             <input type="range" id="pitch-slider" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
                         </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-50">
+                        <div class="space-y-4">
+                            <div class="flex justify-between text-[10px] font-black uppercase tracking-[0.2em] opacity-50">
                                 <span>Velocidade</span>
                                 <span id="speed-val" class="text-fuchsia-500">1.00x</span>
                             </div>
@@ -135,79 +138,85 @@
                         </div>
                     </div>
 
-                    <div class="flex flex-wrap items-center justify-center gap-6 py-4">
-                        <button id="loop-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all"><i data-lucide="repeat" class="w-5 h-5"></i></button>
-                        <button id="prev-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10"><i data-lucide="chevron-left" class="w-6 h-6"></i></button>
-                        <button id="play-pause-btn" class="h-20 w-20 rounded-full bg-violet-600 text-white flex items-center justify-center shadow-xl active:scale-95 transition-transform">
-                            <i data-lucide="play" id="play-icon" class="w-8 h-8 fill-current"></i>
+                    <div class="flex flex-wrap items-center justify-center gap-8 py-4">
+                        <button id="loop-btn" class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-slate-400"><i data-lucide="repeat" class="w-6 h-6"></i></button>
+                        <button id="prev-btn" class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300"><i data-lucide="skip-back" class="w-7 h-7"></i></button>
+                        <button id="play-pause-btn" class="h-28 w-28 rounded-[2.5rem] bg-violet-600 text-white flex items-center justify-center shadow-2xl shadow-violet-900/40 active:scale-95 transition-all">
+                            <i data-lucide="play" id="play-icon" class="w-12 h-12 fill-current ml-1"></i>
                         </button>
-                        <button id="next-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10"><i data-lucide="chevron-right" class="w-6 h-6"></i></button>
-                        <button id="reverse-btn" class="p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all"><i data-lucide="rotate-ccw" class="w-5 h-5"></i></button>
+                        <button id="next-btn" class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 text-slate-300"><i data-lucide="skip-forward" class="w-7 h-7"></i></button>
+                        <button id="reverse-btn" class="p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all text-slate-400"><i data-lucide="rotate-ccw" class="w-6 h-6"></i></button>
                     </div>
 
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <div class="flex items-center gap-4 bg-black/20 p-4 rounded-2xl flex-1 w-full border border-white/5">
-                            <i data-lucide="volume-2" class="w-4 h-4 opacity-40"></i>
+                    <div class="flex flex-col xl:flex-row items-center gap-6 pt-4">
+                        <div class="flex items-center gap-4 bg-black/20 p-5 rounded-[2rem] flex-1 w-full border border-white/5">
+                            <i data-lucide="volume-2" class="w-5 h-5 opacity-30"></i>
                             <input type="range" id="volume-slider" min="0" max="1.5" step="0.01" value="1.00" class="flex-1">
                         </div>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <select id="export-quality" class="bg-black/20 text-[10px] font-bold p-4 rounded-2xl border border-white/5 outline-none flex-1 sm:flex-none">
-                                <option value="mid">NORMAL (32kHz)</option>
-                                <option value="low">LO-FI (22kHz Mono)</option>
-                                <option value="high">PRO (44kHz)</option>
-                            </select>
-                            <button id="export-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-4 rounded-2xl font-black text-[10px] uppercase transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="download" class="w-4 h-4"></i> Download
+                        
+                        <div class="flex items-center gap-3 w-full xl:w-auto">
+                            <div class="flex-1 xl:flex-none relative">
+                                <select id="export-target" class="w-full bg-black/30 text-[10px] font-black uppercase p-5 rounded-[2rem] border border-white/10 outline-none appearance-none cursor-pointer pr-12 hover:bg-black/50 transition-colors">
+                                    <option value="15">Pesado (~15MB)</option>
+                                    <option value="5" selected>Leve (~5MB)</option>
+                                    <option value="1">Muito Leve (<1MB)</option>
+                                    <option value="original">Original (HD)</option>
+                                </select>
+                                <i data-lucide="chevron-down" class="absolute right-5 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none opacity-40"></i>
+                            </div>
+                            <button id="export-btn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-10 py-5 rounded-[2rem] font-black text-[10px] uppercase transition-all flex items-center justify-center gap-3 shadow-xl shadow-emerald-900/20 active:scale-95 group">
+                                <i data-lucide="download" class="w-5 h-5 group-hover:bounce"></i> Exportar
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="empty-ui" class="text-center space-y-6">
-                    <div class="w-24 h-24 bg-violet-600/10 rounded-full flex items-center justify-center mx-auto border border-violet-600/20">
-                        <i data-lucide="music" class="w-10 h-10 text-violet-500"></i>
+                <div id="empty-ui" class="flex-1 flex flex-col items-center justify-center space-y-8 py-20">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-violet-600 blur-3xl opacity-20 animate-pulse"></div>
+                        <div class="w-32 h-32 bg-violet-600/10 rounded-[3rem] flex items-center justify-center relative border border-violet-500/20">
+                            <i data-lucide="music-4" class="w-16 h-16 text-violet-500"></i>
+                        </div>
                     </div>
-                    <h3 class="text-lg font-bold uppercase tracking-widest opacity-30">Importe para começar</h3>
+                    <div class="text-center">
+                        <h3 class="text-2xl font-bold uppercase tracking-tighter italic opacity-50 mb-2">ScrewBrowser Studio</h3>
+                        <p class="text-xs font-medium opacity-30 uppercase tracking-[0.3em]">Importe um ficheiro para começar</p>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="lg:col-span-4 space-y-6">
-            <div class="glass-panel rounded-[2rem] p-6 h-[400px] flex flex-col">
-                <div class="flex items-center gap-2 mb-4 opacity-40">
-                    <i data-lucide="list-music" class="w-4 h-4"></i>
-                    <h3 class="text-[10px] font-black uppercase tracking-widest">Lista de Reprodução</h3>
+            <div class="glass-panel rounded-[3rem] p-7 h-[450px] flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center gap-3 opacity-40">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                        <h3 class="text-[10px] font-black uppercase tracking-widest">Fila</h3>
+                    </div>
+                    <span id="queue-count" class="text-[10px] font-bold opacity-20 tabular-nums">0</span>
                 </div>
-                <div id="playlist-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2"></div>
+                <div id="playlist-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-3"></div>
             </div>
             
-            <div class="glass-panel rounded-[2rem] p-6 h-[200px] flex flex-col">
-                <div class="flex items-center gap-2 mb-4 opacity-40">
+            <div class="glass-panel rounded-[3rem] p-7 h-[250px] flex flex-col">
+                <div class="flex items-center gap-3 mb-6 opacity-40">
                     <i data-lucide="history" class="w-4 h-4"></i>
-                    <h3 class="text-[10px] font-black uppercase tracking-widest">Histórico de Downloads</h3>
+                    <h3 class="text-[10px] font-black uppercase tracking-widest">Histórico</h3>
                 </div>
-                <div id="history-container" class="flex-1 overflow-y-auto space-y-2 custom-scrollbar pr-2"></div>
+                <div id="history-container" class="flex-1 overflow-y-auto space-y-3 custom-scrollbar pr-3"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // --- State Management ---
+        // --- State ---
         let playlist = [];
         let currentIndex = -1;
         let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let sourceNode = null;
-        let gainNode = null;
-        let originalBuffer = null;
-        let activeBuffer = null;
-        let isPlaying = false;
-        let isLooping = false;
-        let isReverse = false;
-        let startTime = 0;
-        let offset = 0;
-        let speed = 1.0;
-        let pitch = 1.0;
-        let volume = 1.0;
+        let sourceNode = null, gainNode = null;
+        let originalBuffer = null, activeBuffer = null;
+        let isPlaying = false, isLooping = false, isReverse = false;
+        let startTime = 0, offset = 0, speed = 1.0, pitch = 1.0, volume = 1.0;
         let animationFrame = null;
 
         const ui = {
@@ -227,19 +236,19 @@
             badgeLoop: document.getElementById('badge-loop'),
             timeCurrent: document.getElementById('time-current'),
             timeDuration: document.getElementById('time-duration'),
-            exportBtn: document.getElementById('export-btn')
+            exportBtn: document.getElementById('export-btn'),
+            exportTarget: document.getElementById('export-target'),
+            queueCount: document.getElementById('queue-count')
         };
 
-        window.onload = () => {
-            lucide.createIcons();
-            setTheme('dark');
-        };
+        window.onload = () => { lucide.createIcons(); setTheme('dark'); };
 
         // --- Themes ---
         function setTheme(m) {
             document.body.classList.remove('theme-light', 'theme-gradient');
             if(m === 'light') document.body.classList.add('theme-light');
             if(m === 'gradient') document.body.classList.add('theme-gradient');
+            lucide.createIcons();
         }
 
         function updateGradient() {
@@ -248,12 +257,13 @@
             document.body.style.setProperty('--grad-2', document.getElementById('grad-color-2').value);
         }
 
-        // --- Optimized File Handling ---
+        // --- Files ---
         ui.fileUpload.addEventListener('change', (e) => {
             const files = Array.from(e.target.files);
             files.forEach(file => {
                 playlist.push({ id: crypto.randomUUID(), name: file.name, file: file });
             });
+            ui.queueCount.innerText = playlist.length;
             renderPlaylist();
             if (currentIndex === -1) loadTrack(0);
         });
@@ -264,13 +274,11 @@
             currentIndex = idx;
             const item = playlist[idx];
             
-            // UI instantânea enquanto processa
             ui.trackName.innerText = item.name;
             ui.emptyUI.classList.add('hidden');
             ui.playerUI.classList.remove('hidden');
             renderPlaylist();
 
-            // Decode assíncrono para não travar a UI
             try {
                 const arrayBuf = await item.file.arrayBuffer();
                 originalBuffer = await audioCtx.decodeAudioData(arrayBuf);
@@ -280,9 +288,7 @@
                 ui.timeDuration.innerText = formatTime(activeBuffer.duration);
                 offset = 0;
                 updateProgressUI(0);
-            } catch (err) {
-                console.error("Erro no decode:", err);
-            }
+            } catch (err) { console.error(err); }
         }
 
         function renderPlaylist() {
@@ -290,18 +296,21 @@
             playlist.forEach((item, idx) => {
                 const active = idx === currentIndex;
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-xl cursor-pointer flex justify-between items-center group transition-all ${active ? 'bg-violet-600 text-white' : 'bg-white/5 hover:bg-white/10'}`;
+                div.className = `p-4 rounded-2xl cursor-pointer flex justify-between items-center group transition-all ${active ? 'bg-violet-600 text-white shadow-xl shadow-violet-900/20' : 'bg-white/5 hover:bg-white/10'}`;
                 div.onclick = () => loadTrack(idx);
                 div.innerHTML = `
-                    <span class="text-[10px] font-bold truncate max-w-[80%]">${item.name}</span>
-                    <i data-lucide="${active && isPlaying ? 'pause' : 'play'}" class="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                    <div class="flex items-center gap-3 truncate">
+                        <div class="w-2 h-2 rounded-full ${active ? 'bg-white animate-pulse' : 'bg-violet-500/30'}"></div>
+                        <span class="text-[11px] font-bold truncate">${item.name}</span>
+                    </div>
+                    <i data-lucide="${active && isPlaying ? 'pause-circle' : 'play-circle'}" class="w-4 h-4 ${active ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity"></i>
                 `;
                 ui.playlist.appendChild(div);
             });
             lucide.createIcons();
         }
 
-        // --- Audio Logic ---
+        // --- Core Audio ---
         function playAudio(from = offset) {
             if (!activeBuffer) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -355,22 +364,26 @@
             ui.timeCurrent.innerText = formatTime(val);
         }
 
-        // --- Interaction Controls ---
+        // --- Controls ---
         ui.playBtn.onclick = () => isPlaying ? stopAudio() : playAudio();
+        
         ui.pitchSlider.oninput = (e) => {
             pitch = parseFloat(e.target.value);
             document.getElementById('pitch-val').innerText = pitch.toFixed(2) + 'x';
             if (sourceNode) sourceNode.detune.setTargetAtTime((pitch - 1) * 1200, audioCtx.currentTime, 0.05);
         };
+        
         ui.speedSlider.oninput = (e) => {
             speed = parseFloat(e.target.value);
             document.getElementById('speed-val').innerText = speed.toFixed(2) + 'x';
             if (sourceNode) sourceNode.playbackRate.setTargetAtTime(speed, audioCtx.currentTime, 0.05);
         };
+
         ui.volumeSlider.oninput = (e) => {
             volume = parseFloat(e.target.value);
             if (gainNode) gainNode.gain.setTargetAtTime(volume, audioCtx.currentTime, 0.05);
         };
+
         ui.progressSlider.oninput = (e) => {
             offset = parseFloat(e.target.value);
             if (isPlaying) playAudio(offset); else updateProgressUI(offset);
@@ -412,23 +425,42 @@
         document.getElementById('next-btn').onclick = () => loadTrack((currentIndex + 1) % playlist.length);
         document.getElementById('prev-btn').onclick = () => loadTrack((currentIndex - 1 + playlist.length) % playlist.length);
 
-        // --- Lag-Free Export (Background Processing) ---
+        // --- Precision Export Engine ---
         ui.exportBtn.onclick = async function() {
             if (!activeBuffer) return;
-            const quality = document.getElementById('export-quality').value;
+            const targetMB = ui.exportTarget.value;
             const btn = this;
             
             btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Processando...`;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Calculando...`;
             lucide.createIcons();
 
-            // Configuração
-            let targetSR = 32000; 
+            // Lógica de Redução de Tamanho Precision
+            let targetSR = 44100;
             let mono = false;
-            if(quality === 'high') targetSR = 44100;
-            if(quality === 'low') { targetSR = 22050; mono = true; }
+            const duration = activeBuffer.duration / speed;
 
-            // OfflineContext corre numa thread separada do audio principal
+            if (targetMB === "original") {
+                targetSR = 44100;
+            } else {
+                // Cálculo para caber no limite:
+                // Tamanho (Bytes) = (Duração * Canais * SampleRate * BitDepth/8)
+                // SampleRate = (Tamanho em Bytes) / (Duração * Canais * 2)
+                const targetBytes = targetMB * 1024 * 1024;
+                
+                // Primeiro tenta Stereo
+                targetSR = targetBytes / (duration * 2 * 2);
+
+                // Se a SR for muito baixa para Stereo (< 16kHz), muda para Mono para ganhar qualidade
+                if (targetSR < 16000) {
+                    mono = true;
+                    targetSR = targetBytes / (duration * 1 * 2);
+                }
+
+                // Limites de segurança para não corromper o áudio
+                targetSR = Math.min(44100, Math.max(8000, Math.floor(targetSR)));
+            }
+
             const offlineCtx = new OfflineAudioContext(mono ? 1 : 2, (activeBuffer.length/speed) * (targetSR/activeBuffer.sampleRate), targetSR);
             const source = offlineCtx.createBufferSource();
             source.buffer = activeBuffer;
@@ -438,68 +470,54 @@
             source.start(0);
 
             const rendered = await offlineCtx.startRendering();
-            
-            // Gerar o Blob WAV de forma otimizada
             const blob = bufferToWav(rendered);
             const url = URL.createObjectURL(blob);
-            const fileName = `Screw_${Date.now()}.wav`;
+            const fileName = `Screw_${targetMB}MB_${playlist[currentIndex].name.split('.')[0]}.wav`;
             
             const a = document.createElement('a');
             a.href = url;
             a.download = fileName;
             a.click();
 
-            // Log de histórico
             const log = document.createElement('div');
-            log.className = "p-2 bg-white/5 rounded-lg text-[9px] flex justify-between items-center";
-            log.innerHTML = `<span class="truncate pr-2">${fileName}</span> <span class="text-emerald-500 font-bold">${(blob.size/1024/1024).toFixed(1)}MB</span>`;
+            log.className = "p-3 bg-white/5 rounded-xl text-[9px] flex justify-between items-center animate-in fade-in slide-in-from-right duration-500";
+            log.innerHTML = `<span class="truncate pr-2 font-bold">${fileName}</span> <span class="text-emerald-500 font-black">${(blob.size/1024/1024).toFixed(1)}MB</span>`;
             ui.history.prepend(log);
 
             btn.disabled = false;
-            btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i> Download`;
+            btn.innerHTML = `<i data-lucide="download" class="w-4 h-4"></i> Exportar`;
             lucide.createIcons();
         };
 
-        // Função síncrona otimizada para o worker principal
         function bufferToWav(buffer) {
             const numChannels = buffer.numberOfChannels;
             const sampleRate = buffer.sampleRate;
-            const format = 1; // PCM
-            const bitDepth = 16;
-            const bytesPerSample = bitDepth / 8;
-            const blockAlign = numChannels * bytesPerSample;
+            const blockAlign = numChannels * 2;
             const dataSize = buffer.length * blockAlign;
-            const headerSize = 44;
-            const fileSize = headerSize + dataSize;
-            const arrayBuffer = new ArrayBuffer(fileSize);
+            const arrayBuffer = new ArrayBuffer(44 + dataSize);
             const view = new DataView(arrayBuffer);
 
-            const writeString = (offset, string) => {
-                for (let i = 0; i < string.length; i++) {
-                    view.setUint8(offset + i, string.charCodeAt(i));
-                }
-            };
+            const writeString = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
 
             writeString(0, 'RIFF');
-            view.setUint32(4, fileSize - 8, true);
+            view.setUint32(4, 36 + dataSize, true);
             writeString(8, 'WAVE');
             writeString(12, 'fmt ');
             view.setUint32(16, 16, true);
-            view.setUint16(20, format, true);
+            view.setUint16(20, 1, true); // PCM
             view.setUint16(22, numChannels, true);
             view.setUint32(24, sampleRate, true);
             view.setUint32(28, sampleRate * blockAlign, true);
             view.setUint16(32, blockAlign, true);
-            view.setUint16(34, bitDepth, true);
+            view.setUint16(34, 16, true); // 16-bit
             writeString(36, 'data');
             view.setUint32(40, dataSize, true);
 
             let offset = 44;
             for (let i = 0; i < buffer.length; i++) {
-                for (let channel = 0; channel < numChannels; channel++) {
-                    let sample = buffer.getChannelData(channel)[i];
-                    sample = Math.max(-1, Math.min(1, sample));
-                    view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+                for (let ch = 0; ch < numChannels; ch++) {
+                    let s = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+                    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
                     offset += 2;
                 }
             }
