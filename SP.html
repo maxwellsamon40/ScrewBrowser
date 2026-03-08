@@ -3,70 +3,128 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ScrewBrowser</title>
+    <title>ScrewBrowser - Swifter Studio v5.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- LameJS para conversão MP3 de alta qualidade -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lamejs/1.2.1/lame.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
         
         :root {
-            --theme-bg: #0a0a0f;
             --accent: #8b5cf6;
-            --glass: rgba(15, 15, 25, 0.7);
+            --bg-color: #0a0a0f;
+            --panel-bg: rgba(15, 15, 25, 0.7);
+            --text-color: #f1f5f9;
         }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: var(--theme-bg);
-            color: #f1f5f9;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             min-height: 100vh;
-            transition: background-color 0.8s ease;
+            transition: background-color 0.4s ease;
             overflow-x: hidden;
         }
 
+        body.day-mode {
+            --bg-color: #f8fafc;
+            --panel-bg: rgba(255, 255, 255, 0.8);
+            --text-color: #0f172a;
+        }
+
         .glass-panel {
-            background: var(--glass);
+            background: var(--panel-bg);
             backdrop-filter: blur(30px);
             border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
-        /* Ibis Paint Color Picker Style */
-        .color-picker-container {
-            width: 44px; height: 44px; border-radius: 12px;
-            overflow: hidden; border: 2px solid rgba(255,255,255,0.1);
-            position: relative; background: conic-gradient(red, yellow, lime, aqua, blue, magenta, red);
+        .color-ring {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            padding: 3px;
+            background: conic-gradient(from 0deg, #ff0000, #ff8000, #ffff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff, #ff0000);
+            position: relative;
         }
-        #color-picker { position: absolute; top: -5px; left: -5px; width: 60px; height: 60px; cursor: pointer; opacity: 0; }
-        .color-preview { position: absolute; inset: 4px; border-radius: 8px; background: var(--theme-bg); pointer-events: none; }
+
+        .timeline-container {
+            position: relative;
+            height: 160px;
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--accent);
+            border-radius: 1.5rem;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .keyframe {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: var(--accent);
+            border: 2px solid white;
+            border-radius: 4px;
+            transform: translate(-50%, -50%);
+            z-index: 20;
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .playhead {
+            position: absolute;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: #f43f5e;
+            box-shadow: 0 0 10px #f43f5e;
+            z-index: 30;
+            pointer-events: none;
+        }
 
         input[type="range"] { -webkit-appearance: none; background: transparent; }
         input[type="range"]::-webkit-slider-thumb { 
             -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; 
-            background: white; border: 3px solid var(--accent); cursor: pointer; margin-top: -7px;
-            box-shadow: 0 0 15px var(--accent);
+            background: white; border: 3px solid var(--accent); margin-top: -6px;
         }
-        input[type="range"]::-webkit-slider-runnable-track { width: 100%; height: 5px; background: rgba(255,255,255,0.1); border-radius: 10px; }
+        input[type="range"]::-webkit-slider-runnable-track { height: 6px; background: rgba(128,128,128,0.2); border-radius: 10px; }
 
-        .hidden-game { display: none !important; }
-        .active-track { background: rgba(139, 92, 246, 0.2) !important; border-color: var(--accent) !important; }
+        .mode-pitch { --accent: #a78bfa; }
+        .mode-speed { --accent: #60a5fa; }
+        .mode-bass { --accent: #fbbf24; }
+        .mode-dist { --accent: #f87171; }
 
-        body.day-mode { background-color: #f0f2f5; color: #1e293b; --glass: rgba(255, 255, 255, 0.8); --theme-bg: #f0f2f5; }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        #game-panel {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(25px);
+            padding: 20px;
+            flex-direction: column;
+        }
+        #game-panel.active { display: flex; }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #1a1a24;
+            padding: 12px 20px;
+            border-radius: 16px 16px 0 0;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
-<body class="night-mode">
+<body class="night-mode mode-pitch">
 
-    <nav class="max-w-6xl mx-auto mt-6 px-4 flex justify-between items-center z-50 relative">
+    <nav class="max-w-7xl mx-auto mt-6 px-4 flex justify-between items-center z-50 relative">
         <div class="flex items-center gap-4 cursor-pointer group" onclick="checkSecret()">
-            <div class="w-12 h-12 bg-violet-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+            <div class="w-12 h-12 bg-violet-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform">
                 <i data-lucide="zap" class="text-white fill-white"></i>
             </div>
             <div>
-                <h1 class="font-black text-2xl tracking-tighter italic">SCREWBROWSER</h1>
-                <p class="text-[8px] font-bold uppercase tracking-[0.4em] opacity-50">Instant Engine v3.0</p>
+                <h1 class="font-black text-2xl italic tracking-tighter">SCREWBROWSER</h1>
+                <p class="text-[8px] font-bold uppercase tracking-[0.4em] opacity-50">Swifter Studio v5.1</p>
             </div>
         </div>
 
@@ -74,11 +132,11 @@
             <button onclick="toggleTheme()" class="p-3 hover:bg-white/10 rounded-xl transition-all">
                 <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
             </button>
-            <div class="color-picker-container">
-                <div id="preview-box" class="color-preview"></div>
-                <input type="color" id="color-picker" value="#0a0a0f">
+            <div class="color-ring">
+                <input type="color" id="color-picker" value="#0a0a0f" class="w-full h-full opacity-0 cursor-pointer absolute inset-0 z-10">
+                <div id="preview-box" class="w-full h-full rounded-[10px] bg-[#0a0a0f] pointer-events-none border border-white/10"></div>
             </div>
-            <label class="cursor-pointer bg-violet-600 hover:bg-violet-500 px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase flex items-center gap-2 transition-all active:scale-95">
+            <label class="cursor-pointer bg-violet-600 hover:bg-violet-500 px-6 py-3 rounded-xl text-[10px] font-black text-white uppercase flex items-center gap-2 transition-all">
                 <i data-lucide="plus" class="w-4 h-4"></i> Importar
                 <input type="file" id="audio-input" accept="audio/*" multiple class="hidden">
             </label>
@@ -86,123 +144,142 @@
     </nav>
 
     <main class="max-w-7xl mx-auto p-4 md:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 relative z-10">
-        
-        <!-- Sidebar: Playlist -->
-        <div class="lg:col-span-3 space-y-4" id="sidebar-playlist">
-            <div class="glass-panel rounded-3xl p-6 h-[500px] flex flex-col">
-                <h3 class="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4 flex items-center gap-2">
-                    <i data-lucide="list-music" class="w-3 h-3"></i> Playlist
-                </h3>
-                <div id="playlist-items" class="flex-1 overflow-y-auto space-y-2 pr-2 custom-scrollbar">
-                    <div class="text-center py-10 opacity-20 text-[10px] font-bold">Vazio</div>
+        <div class="lg:col-span-3 space-y-4">
+            <div class="glass-panel rounded-3xl p-6 h-[300px] flex flex-col">
+                <h3 class="text-[10px] font-black uppercase tracking-widest opacity-40 mb-4">Músicas</h3>
+                <div id="playlist-items" class="flex-1 overflow-y-auto space-y-2 pr-2"></div>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-6 space-y-4">
+                <button id="btn-swifter" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-4 rounded-2xl text-[11px] font-black uppercase flex items-center justify-center gap-2 shadow-xl transition-all">
+                    <i data-lucide="shuffle"></i> Swifter: <span id="mode-text">Pitch</span>
+                </button>
+                <button id="btn-fix-point" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-4 rounded-2xl text-[11px] font-black uppercase flex items-center justify-center gap-2 shadow-xl transition-all">
+                    <i data-lucide="pin"></i> Fixar Valor Atual
+                </button>
+                <div class="grid grid-cols-3 gap-2 pt-2">
+                    <button onclick="setEasing('linear')" class="ease-btn bg-violet-600 text-white p-2 rounded-lg text-[9px] font-bold">LIN</button>
+                    <button onclick="setEasing('ease')" class="ease-btn bg-white/5 p-2 rounded-lg text-[9px] font-bold">SMO</button>
+                    <button onclick="setEasing('bounce')" class="ease-btn bg-white/5 p-2 rounded-lg text-[9px] font-bold">BNC</button>
+                </div>
+                <div class="pt-2 border-t border-white/5 grid grid-cols-1 gap-2">
+                    <button onclick="deleteLastKeyframe()" class="w-full bg-white/5 p-3 rounded-xl text-[9px] font-black uppercase">Apagar Último</button>
+                    <button onclick="clearKeyframes()" class="w-full bg-rose-500/10 text-rose-500 p-3 rounded-xl text-[9px] font-black uppercase">Limpar Tudo</button>
                 </div>
             </div>
         </div>
 
-        <!-- Player Central -->
-        <div class="lg:col-span-9 space-y-6" id="player-column">
-            <div id="welcome-ui" class="glass-panel rounded-[3rem] p-12 text-center space-y-6">
-                <div class="w-20 h-20 bg-violet-600/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i data-lucide="music" class="w-10 h-10 text-violet-400"></i>
-                </div>
-                <h2 class="text-3xl font-black italic">Pronto para o Remix?</h2>
-                <p class="opacity-50 text-sm max-w-sm mx-auto">Importa áudios para começar. A exportação agora é imediata e reduz 30KB do original.</p>
-            </div>
-
-            <div id="player-ui" class="hidden glass-panel rounded-[3rem] p-8 md:p-10 space-y-8 relative overflow-hidden">
-                <div class="text-center relative">
-                    <h2 id="track-title" class="text-2xl font-black truncate max-w-xl mx-auto italic">Sem Faixa</h2>
-                    <div id="loop-status-tag" class="hidden mt-2 text-[9px] font-black text-emerald-400 uppercase tracking-widest">Loop Ativado</div>
+        <div class="lg:col-span-9 space-y-6">
+            <div id="player-ui" class="glass-panel rounded-[3rem] p-8 md:p-10 space-y-6">
+                <div id="welcome-ui" class="text-center py-20 opacity-30">
+                    <i data-lucide="audio-lines" class="w-16 h-16 mx-auto mb-4"></i>
+                    <p class="font-bold italic">Carrega um áudio para remixar</p>
                 </div>
 
-                <div class="space-y-4">
-                    <input type="range" id="seek-bar" min="0" value="0" step="0.01" class="w-full">
-                    <div class="flex justify-between text-[11px] font-bold opacity-40 font-mono">
-                        <span id="time-cur">00:00</span>
-                        <span id="time-total">00:00</span>
+                <div id="studio-ui" class="hidden space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 id="track-title" class="text-2xl font-black italic truncate max-w-sm">Sem Título</h2>
+                        <div class="flex gap-4 font-mono text-xs">
+                            <span id="time-cur" class="text-violet-500">0:00</span>
+                            <span id="time-total" class="opacity-20">0:00</span>
+                        </div>
                     </div>
-                </div>
 
-                <!-- Controles -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
-                        <div class="flex justify-between text-[9px] font-black uppercase opacity-40"><span>Pitch</span><span id="val-pitch">1.00x</span></div>
-                        <input type="range" id="slider-pitch" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
+                    <div class="space-y-4">
+                        <div id="timeline" class="timeline-container">
+                            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle, #fff 1px, transparent 1px); background-size: 20px 20px;"></div>
+                            <div id="playhead" class="playhead"></div>
+                            <div id="keyframes-layer"></div>
+                            <svg class="absolute inset-0 w-full h-full pointer-events-none">
+                                <path id="timeline-path" d="" fill="none" stroke="currentColor" stroke-width="3" class="opacity-60 transition-all duration-300" />
+                            </svg>
+                        </div>
+                        <input type="range" id="seek-bar" min="0" value="0" step="0.001" class="w-full">
                     </div>
-                    <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
-                        <div class="flex justify-between text-[9px] font-black uppercase opacity-40"><span>Speed</span><span id="val-speed">1.00x</span></div>
-                        <input type="range" id="slider-speed" min="0.5" max="1.5" step="0.01" value="1.00" class="w-full">
-                    </div>
-                    <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
-                        <div class="flex justify-between text-[9px] font-black uppercase opacity-40"><span>Bass</span><span id="val-bass">0dB</span></div>
-                        <input type="range" id="slider-bass" min="0" max="40" step="1" value="0" class="w-full">
-                    </div>
-                    <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
-                        <div class="flex justify-between text-[9px] font-black uppercase opacity-40"><span>Distort</span><span id="val-dist">OFF</span></div>
-                        <input type="range" id="slider-dist" min="0" max="100" step="1" value="0" class="w-full">
-                    </div>
-                </div>
 
-                <!-- Playback -->
-                <div class="flex items-center justify-center gap-6">
-                    <button id="btn-loop" class="w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all border border-white/5">
-                        <i data-lucide="repeat" class="w-5 h-5"></i>
-                    </button>
-                    <button id="btn-play" class="w-24 h-24 rounded-[2.2rem] bg-violet-600 flex items-center justify-center shadow-xl hover:scale-105 active:scale-95 transition-all">
-                        <i data-lucide="play" id="play-icon" class="w-10 h-10 text-white fill-white"></i>
-                    </button>
-                    <button id="btn-rev" class="w-14 h-14 rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-all border border-white/5">
-                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
-                    </button>
-                </div>
-
-                <!-- Footer/Export -->
-                <div class="pt-6 border-t border-white/5 flex flex-col md:flex-row items-center gap-6">
-                    <div class="flex-1 w-full bg-black/20 p-4 rounded-xl flex items-center gap-4 border border-white/5">
-                        <i data-lucide="volume-2" class="opacity-30 w-4 h-4"></i>
-                        <input type="range" id="slider-vol" min="0" max="2" step="0.01" value="1.00" class="flex-1">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+                            <div class="flex justify-between text-[9px] font-black opacity-40 uppercase"><span>Pitch</span><span id="val-pitch">1.0</span></div>
+                            <input type="range" id="slider-pitch" min="0.5" max="1.5" step="0.01" value="1.0" class="w-full">
+                        </div>
+                        <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+                            <div class="flex justify-between text-[9px] font-black opacity-40 uppercase"><span>Speed</span><span id="val-speed">1.0</span></div>
+                            <input type="range" id="slider-speed" min="0.5" max="1.5" step="0.01" value="1.0" class="w-full">
+                        </div>
+                        <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+                            <div class="flex justify-between text-[9px] font-black opacity-40 uppercase"><span>Bass</span><span id="val-bass">0dB</span></div>
+                            <input type="range" id="slider-bass" min="0" max="40" step="1" value="0" class="w-full">
+                        </div>
+                        <div class="bg-black/20 p-4 rounded-2xl border border-white/5 space-y-2">
+                            <div class="flex justify-between text-[9px] font-black opacity-40 uppercase"><span>Distort</span><span id="val-dist">OFF</span></div>
+                            <input type="range" id="slider-dist" min="0" max="100" step="1" value="0" class="w-full">
+                        </div>
                     </div>
-                    <button id="btn-export" class="w-full md:w-auto bg-emerald-600 hover:bg-emerald-500 px-8 py-5 rounded-xl font-black text-[10px] uppercase text-white shadow-lg transition-all flex items-center gap-2">
-                        <i data-lucide="zap" class="w-4 h-4"></i> Exportação Imediata
-                    </button>
-                </div>
-            </div>
-        </div>
 
-        <!-- Painel Secreto (O Jogo) -->
-        <div id="game-panel" class="lg:col-span-12 hidden-game space-y-4">
-            <div class="glass-panel p-5 rounded-[2.5rem] h-full flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <div class="flex gap-2">
-                        <button onclick="closeGame()" class="px-4 py-2 bg-rose-500/20 text-rose-400 rounded-lg text-[10px] font-black uppercase hover:bg-rose-500/30">
-                            <i data-lucide="x" class="w-3 h-3 inline mr-1"></i> Fechar
-                        </button>
-                        <!-- BOTÃO DE RELOAD VOLTOU -->
-                        <button onclick="reloadGame()" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-[10px] font-black uppercase hover:bg-emerald-500/30">
-                            <i data-lucide="refresh-cw" class="w-3 h-3 inline mr-1"></i> Recarregar Jogo
+                    <div class="flex flex-col md:flex-row items-center gap-6 pt-6 border-t border-white/5">
+                        <div class="flex items-center gap-4">
+                            <button id="btn-loop" class="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors">
+                                <i data-lucide="repeat" class="w-5 h-5"></i>
+                            </button>
+                            <button id="btn-play" class="w-20 h-20 rounded-3xl bg-violet-600 flex items-center justify-center shadow-xl shadow-violet-500/40 active:scale-95 transition-all">
+                                <i data-lucide="play" id="play-icon" class="w-8 h-8 text-white fill-white"></i>
+                            </button>
+                            <button id="btn-rev" class="p-4 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10">
+                                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <div class="flex-1 w-full bg-black/20 p-5 rounded-3xl flex items-center gap-4">
+                            <i data-lucide="volume-2" class="opacity-20 w-4 h-4"></i>
+                            <input type="range" id="slider-vol" min="0" max="2" step="0.01" value="1.0" class="flex-1">
+                        </div>
+                        <button id="btn-export" class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-5 rounded-3xl font-black text-[10px] uppercase shadow-lg transition-all flex items-center gap-2">
+                            <i data-lucide="download" class="w-4 h-4"></i> Exportar Remix HQ
                         </button>
                     </div>
-                    <span class="text-[10px] font-black opacity-20 italic">THE GAME BY MAXWELL</span>
-                </div>
-                <div class="bg-black rounded-2xl overflow-hidden shadow-2xl">
-                    <iframe id="game-frame" src="https://gd.games/maxwell4635/the-game" class="w-full h-[600px] border-none"></iframe>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="loader" class="fixed inset-0 bg-black/90 backdrop-blur-2xl z-[100] hidden flex flex-col items-center justify-center">
-        <div class="w-14 h-14 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <h3 id="loader-text" class="text-xs font-black uppercase tracking-widest text-white">Codificando MP3...</h3>
+    <div id="game-panel">
+        <div class="max-w-6xl w-full h-full mx-auto flex flex-col shadow-2xl">
+            <div class="game-header">
+                <div class="flex items-center gap-4">
+                    <div class="bg-violet-600 p-2 rounded-lg"><i data-lucide="gamepad-2" class="w-5 h-5 text-white"></i></div>
+                    <span class="font-black italic text-sm tracking-tighter">MAXWELL'S QUEST</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="gameAction('back')" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="arrow-left" class="w-4 h-4"></i></button>
+                    <button onclick="gameAction('refresh')" class="p-2 hover:bg-white/10 rounded-lg"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                    <button onclick="closeGame()" class="p-2 bg-rose-500/20 hover:bg-rose-500 text-rose-500 rounded-lg ml-2"><i data-lucide="x" class="w-4 h-4"></i></button>
+                </div>
+            </div>
+            <iframe id="game-frame" src="https://gd.games/maxwell4635/the-game" class="w-full flex-1 border-none bg-black rounded-b-2xl"></iframe>
+        </div>
+    </div>
+
+    <div id="loader" class="fixed inset-0 bg-black/90 z-[300] hidden flex flex-col items-center justify-center">
+        <div class="w-12 h-12 border-4 border-violet-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p id="loader-text" class="text-[10px] font-black uppercase tracking-[0.3em] text-center px-8">A preparar Studio...</p>
     </div>
 
     <script>
-        let audioCtx, analyzer, source, gainNode, bassNode, distNode;
-        let playlist = [], currentIdx = -1;
+        let audioCtx, source, gainNode, bassNode, distNode;
         let originalBuffer, activeBuffer;
+        let playlist = [], currentIdx = -1;
         let isPlaying = false, isLooping = false, isReverse = false;
         let speed = 1.0, pitch = 1.0, offset = 0, startTime = 0;
         let secretClicks = 0;
+
+        const modes = ['pitch', 'speed', 'bass', 'dist'];
+        let currentModeIdx = 0;
+        let keyframesByMode = { pitch: [], speed: [], bass: [], dist: [] };
+        let easingType = 'linear';
+
+        const timeline = document.getElementById('timeline');
+        const kLayer = document.getElementById('keyframes-layer');
+        const tPath = document.getElementById('timeline-path');
+        const seekBar = document.getElementById('seek-bar');
 
         function initAudio() {
             if(audioCtx) return;
@@ -212,91 +289,155 @@
             bassNode.type = 'lowshelf';
             bassNode.frequency.value = 200;
             distNode = audioCtx.createWaveShaper();
-            analyzer = audioCtx.createAnalyser();
-            bassNode.connect(distNode).connect(gainNode).connect(analyzer).connect(audioCtx.destination);
+            bassNode.connect(distNode).connect(gainNode).connect(audioCtx.destination);
         }
 
-        const makeDistCurve = (amount) => {
-            let k = amount, n = 44100, curve = new Float32Array(n), deg = Math.PI / 180;
-            for (let i = 0; i < n; ++i) {
-                let x = i * 2 / n - 1;
-                curve[i] = (3 + k) * x * 20 * deg / (Math.PI + k * Math.abs(x));
-            }
-            return curve;
+        function getMode() { return modes[currentModeIdx]; }
+
+        document.getElementById('btn-swifter').onclick = () => {
+            currentModeIdx = (currentModeIdx + 1) % modes.length;
+            const mode = getMode();
+            document.body.className = `night-mode mode-${mode}`;
+            document.getElementById('mode-text').innerText = mode.charAt(0).toUpperCase() + mode.slice(1);
+            renderTimeline();
         };
 
-        // --- PLAYLIST ---
+        function updateAudioHardware(p, s, b, d) {
+            if(!source || !audioCtx) return;
+            source.detune.setTargetAtTime((p - 1) * 1200, audioCtx.currentTime, 0.05);
+            source.playbackRate.setTargetAtTime(s, audioCtx.currentTime, 0.05);
+            bassNode.gain.setTargetAtTime(b, audioCtx.currentTime, 0.05);
+            distNode.curve = d > 0 ? makeDistCurve(d * 5) : null;
+        }
+
+        document.getElementById('slider-pitch').oninput = e => {
+            pitch = parseFloat(e.target.value);
+            document.getElementById('val-pitch').innerText = pitch.toFixed(2);
+            updateAudioHardware(pitch, speed, bassNode.gain.value, parseInt(document.getElementById('slider-dist').value));
+        };
+        document.getElementById('slider-speed').oninput = e => {
+            speed = parseFloat(e.target.value);
+            document.getElementById('val-speed').innerText = speed.toFixed(2);
+            updateAudioHardware(pitch, speed, bassNode.gain.value, parseInt(document.getElementById('slider-dist').value));
+        };
+        document.getElementById('slider-bass').oninput = e => {
+            const bVal = parseFloat(e.target.value);
+            document.getElementById('val-bass').innerText = bVal + 'dB';
+            updateAudioHardware(pitch, speed, bVal, parseInt(document.getElementById('slider-dist').value));
+        };
+        document.getElementById('slider-dist').oninput = e => {
+            const dVal = parseInt(e.target.value);
+            document.getElementById('val-dist').innerText = dVal > 0 ? dVal + '%' : 'OFF';
+            updateAudioHardware(pitch, speed, bassNode.gain.value, dVal);
+        };
+
+        timeline.onclick = (e) => {
+            if(!activeBuffer) return;
+            const rect = timeline.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width;
+            const y = 1 - (e.clientY - rect.top) / rect.height;
+            addKeyframe(x, mapYtoVal(y, getMode()));
+        };
+
+        document.getElementById('btn-fix-point').onclick = () => {
+            if(!activeBuffer) return;
+            const now = offset + (isPlaying ? (audioCtx.currentTime - startTime) * speed : 0);
+            const x = now / activeBuffer.duration;
+            const mode = getMode();
+            let val = mode === 'pitch' ? pitch : mode === 'speed' ? speed : mode === 'bass' ? bassNode.gain.value : parseInt(document.getElementById('slider-dist').value);
+            addKeyframe(x, val);
+        };
+
+        function addKeyframe(x, val) {
+            keyframesByMode[getMode()].push({ x, val });
+            keyframesByMode[getMode()].sort((a,b) => a.x - b.x);
+            renderTimeline();
+        }
+
+        function setEasing(type) {
+            easingType = type;
+            document.querySelectorAll('.ease-btn').forEach(b => b.classList.replace('bg-violet-600', 'bg-white/5'));
+            event.target.classList.replace('bg-white/5', 'bg-violet-600');
+            renderTimeline();
+        }
+
+        function deleteLastKeyframe() { keyframesByMode[getMode()].pop(); renderTimeline(); }
+        function clearKeyframes() { keyframesByMode[getMode()] = []; renderTimeline(); }
+
+        function mapYtoVal(y, mode) {
+            if(mode === 'pitch' || mode === 'speed') return 0.5 + y;
+            if(mode === 'bass') return y * 40;
+            return y * 100;
+        }
+
+        function mapValToY(val, mode) {
+            if(mode === 'pitch' || mode === 'speed') return 1 - (val - 0.5);
+            if(mode === 'bass') return 1 - (val / 40);
+            return 1 - (val / 100);
+        }
+
+        function renderTimeline() {
+            kLayer.innerHTML = '';
+            const mode = getMode();
+            const kfs = keyframesByMode[mode];
+            let pathD = '';
+            kfs.forEach((kf, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'keyframe';
+                dot.style.left = (kf.x * 100) + '%';
+                dot.style.top = (mapValToY(kf.val, mode) * 100) + '%';
+                dot.onclick = (e) => { e.stopPropagation(); kfs.splice(i, 1); renderTimeline(); };
+                kLayer.appendChild(dot);
+                const px = kf.x * timeline.clientWidth;
+                const py = mapValToY(kf.val, mode) * timeline.clientHeight;
+                if (i === 0) pathD += `M ${px} ${py}`;
+                else {
+                    const prev = kfs[i-1];
+                    const ppx = prev.x * timeline.clientWidth;
+                    const ppy = mapValToY(prev.val, mode) * timeline.clientHeight;
+                    if (easingType === 'linear') pathD += ` L ${px} ${py}`;
+                    else if (easingType === 'ease') pathD += ` C ${ppx + (px - ppx) / 2} ${ppy}, ${ppx + (px - ppx) / 2} ${py}, ${px} ${py}`;
+                    else pathD += ` Q ${ppx + (px - ppx) / 2} ${ppy - 60}, ${px} ${py}`;
+                }
+            });
+            tPath.setAttribute('d', pathD);
+        }
+
         document.getElementById('audio-input').onchange = async (e) => {
             const files = Array.from(e.target.files);
-            for(const file of files) {
-                playlist.push({ file, name: file.name, size: file.size });
-            }
+            for(let f of files) playlist.push({ file: f, name: f.name });
             renderPlaylist();
             if(currentIdx === -1) selectTrack(0);
         };
 
-        function renderPlaylist() {
-            const container = document.getElementById('playlist-items');
-            if(playlist.length === 0) return;
-            container.innerHTML = playlist.map((item, i) => `
-                <div onclick="selectTrack(${i})" class="p-3 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-all truncate text-[11px] font-bold ${i === currentIdx ? 'active-track' : ''}">
-                    <div class="truncate">${item.name}</div>
-                    <div class="text-[8px] opacity-40 font-mono mt-1">${(item.size/1024/1024).toFixed(2)} MB</div>
-                </div>
-            `).join('');
-        }
-
         async function selectTrack(idx) {
             currentIdx = idx;
-            const item = playlist[idx];
             initAudio();
-            showLoader(true, "Lendo Ficheiro...");
+            showLoader(true);
             stop();
-            offset = 0;
-            
-            const ab = await item.file.arrayBuffer();
+            const ab = await playlist[idx].file.arrayBuffer();
             originalBuffer = await audioCtx.decodeAudioData(ab);
             activeBuffer = originalBuffer;
-            isReverse = false;
-            
-            document.getElementById('track-title').innerText = item.name;
+            document.getElementById('track-title').innerText = playlist[idx].name;
             document.getElementById('time-total').innerText = formatTime(activeBuffer.duration);
-            document.getElementById('seek-bar').max = activeBuffer.duration;
-            document.getElementById('seek-bar').value = 0;
-            
+            seekBar.max = activeBuffer.duration;
+            seekBar.value = 0;
+            offset = 0;
             document.getElementById('welcome-ui').classList.add('hidden');
-            document.getElementById('player-ui').classList.remove('hidden');
-            document.getElementById('btn-rev').classList.remove('text-rose-400', 'bg-rose-500/20');
-            
+            document.getElementById('studio-ui').classList.remove('hidden');
             renderPlaylist();
             showLoader(false);
             play(0);
         }
 
-        // --- MOTOR DE ÁUDIO ---
         function play(from = offset) {
             if(!activeBuffer) return;
-            if(source) { try { source.stop(); } catch(e) {} }
-            
+            if(source) { try { source.stop(); } catch(e){} }
             source = audioCtx.createBufferSource();
             source.buffer = activeBuffer;
             source.playbackRate.value = speed;
             source.detune.value = (pitch - 1) * 1200;
-            source.loop = isLooping;
-            
             source.connect(bassNode);
-            
-            source.onended = () => {
-                if (isLooping && isPlaying) {
-                    offset = 0;
-                    play(0);
-                } else if (isPlaying && (offset + (audioCtx.currentTime - startTime) * speed) >= activeBuffer.duration) {
-                    isPlaying = false;
-                    offset = 0;
-                    updateUI();
-                }
-            };
-
             source.start(0, from);
             startTime = audioCtx.currentTime;
             offset = from;
@@ -306,22 +447,141 @@
         }
 
         function stop() {
-            if(source) { try { source.stop(); } catch(e) {} source = null; }
-            if(isPlaying) {
-                offset += (audioCtx.currentTime - startTime) * speed;
-            }
+            if(source) { try { source.stop(); } catch(e){} source = null; }
+            if(isPlaying) offset += (audioCtx.currentTime - startTime) * speed;
             isPlaying = false;
             updateUI();
         }
 
         function tick() {
             if(!isPlaying) return;
-            const now = offset + (audioCtx.currentTime - startTime) * speed;
-            if(now > activeBuffer.duration && !isLooping) return;
-            
-            document.getElementById('seek-bar').value = now;
+            let now = offset + (audioCtx.currentTime - startTime) * speed;
+            if(now >= activeBuffer.duration) {
+                if(isLooping) { stop(); offset = 0; play(0); return; } 
+                else { stop(); offset = 0; return; }
+            }
+            const perc = now / activeBuffer.duration;
+            const aP = getAutoVal(perc, 'pitch');
+            const aS = getAutoVal(perc, 'speed');
+            const aB = getAutoVal(perc, 'bass');
+            const aD = getAutoVal(perc, 'dist');
+            updateAudioHardware(aP, aS, aB, aD);
+            document.getElementById('val-pitch').innerText = aP.toFixed(2);
+            document.getElementById('val-speed').innerText = aS.toFixed(2);
+            document.getElementById('val-bass').innerText = aB.toFixed(0) + 'dB';
+            document.getElementById('val-dist').innerText = aD > 0 ? aD.toFixed(0) + '%' : 'OFF';
+            document.getElementById('playhead').style.left = (perc * 100) + '%';
+            seekBar.value = now;
             document.getElementById('time-cur').innerText = formatTime(now);
             requestAnimationFrame(tick);
+        }
+
+        function getAutoVal(perc, mode) {
+            const kfs = keyframesByMode[mode];
+            if(!kfs.length) {
+                if(mode === 'pitch') return pitch;
+                if(mode === 'speed') return speed;
+                if(mode === 'bass') return bassNode.gain.value;
+                return parseInt(document.getElementById('slider-dist').value);
+            }
+            if(perc <= kfs[0].x) return kfs[0].val;
+            if(perc >= kfs[kfs.length-1].x) return kfs[kfs.length-1].val;
+            for(let i=0; i<kfs.length-1; i++) {
+                if(perc >= kfs[i].x && perc <= kfs[i+1].x) {
+                    const t = (perc - kfs[i].x) / (kfs[i+1].x - kfs[i].x);
+                    let eT = easingType === 'ease' ? t * t * (3 - 2 * t) : (easingType === 'bounce' ? Math.pow(Math.sin(t * Math.PI), 2) * 0.2 + t : t);
+                    return kfs[i].val + (kfs[i+1].val - kfs[i].val) * eT;
+                }
+            }
+        }
+
+        // --- EXPORTAÇÃO HQ MP3 ---
+        document.getElementById('btn-export').onclick = async () => {
+            if(!activeBuffer) return;
+            showLoader(true);
+            const loaderText = document.getElementById('loader-text');
+            loaderText.innerText = "A processar áudio HQ...";
+
+            const duration = activeBuffer.duration;
+            const sampleRate = activeBuffer.sampleRate;
+            // Usamos o sampleRate original para manter fidelidade
+            const offlineCtx = new OfflineAudioContext(2, sampleRate * duration, sampleRate);
+
+            const offSource = offlineCtx.createBufferSource();
+            offSource.buffer = activeBuffer;
+            const offBass = offlineCtx.createBiquadFilter();
+            offBass.type = 'lowshelf';
+            offBass.frequency.value = 200;
+            const offDist = offlineCtx.createWaveShaper();
+            const offGain = offlineCtx.createGain();
+
+            offSource.connect(offBass).connect(offDist).connect(offGain).connect(offlineCtx.destination);
+
+            // Resolução de 10ms para transições ultra suaves na exportação
+            const exportStep = 0.01;
+            for(let t = 0; t < duration; t += exportStep) {
+                const p = t / duration;
+                const pVal = getAutoVal(p, 'pitch');
+                const sVal = getAutoVal(p, 'speed');
+                const bVal = getAutoVal(p, 'bass');
+                const dVal = getAutoVal(p, 'dist');
+
+                offSource.detune.setValueAtTime((pVal - 1) * 1200, t);
+                offSource.playbackRate.setValueAtTime(sVal, t);
+                offBass.gain.setValueAtTime(bVal, t);
+                if(dVal > 0) offDist.curve = makeDistCurve(dVal * 5);
+            }
+
+            offSource.start(0);
+            const renderedBuffer = await offlineCtx.startRendering();
+            
+            loaderText.innerText = "A converter para MP3 de Alta Qualidade (192kbps)...";
+
+            // Bitrate de 192kbps é o padrão de excelência para MP3 (não limitamos a 1MB para não perder qualidade)
+            const highQualityBitrate = 192;
+            const mp3Blob = bufferToMp3(renderedBuffer, highQualityBitrate);
+            
+            const url = URL.createObjectURL(mp3Blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ScrewBrowser_HQ_${Date.now()}.mp3`;
+            link.click();
+
+            showLoader(false);
+            loaderText.innerText = "A processar Studio...";
+        };
+
+        function bufferToMp3(buffer, bitrate) {
+            const channels = 2; 
+            const sampleRate = buffer.sampleRate;
+            const mp3encoder = new lamejs.Mp3Encoder(channels, sampleRate, bitrate);
+            const mp3Data = [];
+
+            const left = buffer.getChannelData(0);
+            const right = buffer.getChannelData(1);
+
+            // Processamento em blocos para evitar sobrecarga de memória
+            const leftInt16 = new Int16Array(left.length);
+            const rightInt16 = new Int16Array(right.length);
+            for (let i = 0; i < left.length; i++) {
+                // Clipping guard e conversão precisa
+                let l = left[i], r = right[i];
+                leftInt16[i] = (l < -1 ? -1 : l > 1 ? 1 : l) * 0x7FFF;
+                rightInt16[i] = (r < -1 ? -1 : r > 1 ? 1 : r) * 0x7FFF;
+            }
+
+            const sampleBlockSize = 1152;
+            for (let i = 0; i < leftInt16.length; i += sampleBlockSize) {
+                const leftChunk = leftInt16.subarray(i, i + sampleBlockSize);
+                const rightChunk = rightInt16.subarray(i, i + sampleBlockSize);
+                const mp3buf = mp3encoder.encodeBuffer(leftChunk, rightChunk);
+                if (mp3buf.length > 0) mp3Data.push(mp3buf);
+            }
+
+            const finish = mp3encoder.flush();
+            if (finish.length > 0) mp3Data.push(finish);
+
+            return new Blob(mp3Data, { type: 'audio/mp3' });
         }
 
         function updateUI() {
@@ -330,158 +590,84 @@
             lucide.createIcons();
         }
 
+        seekBar.oninput = () => {
+            const p = isPlaying;
+            stop();
+            offset = parseFloat(seekBar.value);
+            if(p) play(offset);
+            else {
+                document.getElementById('time-cur').innerText = formatTime(offset);
+                document.getElementById('playhead').style.left = (offset/activeBuffer.duration*100)+'%';
+            }
+        };
+
+        document.getElementById('btn-play').onclick = () => isPlaying ? stop() : play();
+        document.getElementById('btn-loop').onclick = function() {
+            isLooping = !isLooping;
+            this.classList.toggle('bg-emerald-600', isLooping);
+        };
+        document.getElementById('slider-vol').oninput = e => gainNode.gain.value = e.target.value;
+        
+        document.getElementById('btn-rev').onclick = () => {
+            if(!originalBuffer) return;
+            stop();
+            isReverse = !isReverse;
+            const chan = originalBuffer.numberOfChannels;
+            activeBuffer = audioCtx.createBuffer(chan, originalBuffer.length, originalBuffer.sampleRate);
+            for(let c=0; c<chan; c++) {
+                const d = originalBuffer.getChannelData(c), r = activeBuffer.getChannelData(c);
+                if(isReverse) for(let i=0; i<d.length; i++) r[i] = d[d.length-1-i];
+                else r.set(d);
+            }
+            play(0);
+        };
+
+        function makeDistCurve(amount) {
+            let k = amount, n = 44100, curve = new Float32Array(n);
+            for (let i = 0; i < n; ++i) {
+                let x = i * 2 / n - 1;
+                curve[i] = (3 + k) * x * 20 * (Math.PI/180) / (Math.PI + k * Math.abs(x));
+            }
+            return curve;
+        }
+
+        function toggleTheme() {
+            const isDay = document.body.classList.toggle('day-mode');
+            const icon = document.getElementById('theme-icon');
+            icon.setAttribute('data-lucide', isDay ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+
+        document.getElementById('color-picker').oninput = (e) => {
+            document.body.style.setProperty('--bg-color', e.target.value);
+            document.getElementById('preview-box').style.backgroundColor = e.target.value;
+        };
+
+        function renderPlaylist() {
+            const list = document.getElementById('playlist-items');
+            list.innerHTML = playlist.map((it, i) => `
+                <div onclick="selectTrack(${i})" class="p-3 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 truncate text-[10px] font-bold ${i===currentIdx?'text-violet-500':''}">
+                    ${it.name}
+                </div>
+            `).join('');
+        }
+
         function formatTime(t) {
             const m = Math.floor(t/60), s = Math.floor(t%60);
             return `${m}:${s<10?'0'+s:s}`;
         }
 
-        // --- EVENTOS ---
-        document.getElementById('btn-play').onclick = () => isPlaying ? stop() : play();
-        
-        document.getElementById('btn-loop').onclick = function() {
-            isLooping = !isLooping;
-            this.classList.toggle('bg-emerald-600/20', isLooping);
-            this.classList.toggle('text-emerald-400', isLooping);
-            document.getElementById('loop-status-tag').classList.toggle('hidden', !isLooping);
-            if(source) source.loop = isLooping;
-        };
-
-        document.getElementById('slider-pitch').oninput = (e) => {
-            pitch = parseFloat(e.target.value);
-            document.getElementById('val-pitch').innerText = pitch.toFixed(2)+'x';
-            if(source) source.detune.setTargetAtTime((pitch-1)*1200, audioCtx.currentTime, 0.05);
-        };
-
-        document.getElementById('slider-speed').oninput = (e) => {
-            speed = parseFloat(e.target.value);
-            document.getElementById('val-speed').innerText = speed.toFixed(2)+'x';
-            if(source) source.playbackRate.setTargetAtTime(speed, audioCtx.currentTime, 0.05);
-        };
-
-        document.getElementById('slider-bass').oninput = (e) => {
-            bassNode.gain.value = e.target.value;
-            document.getElementById('val-bass').innerText = e.target.value + 'dB';
-        };
-
-        document.getElementById('slider-dist').oninput = (e) => {
-            const val = parseInt(e.target.value);
-            distNode.curve = val > 0 ? makeDistCurve(val * 5) : null;
-            document.getElementById('val-dist').innerText = val > 0 ? val + '%' : 'OFF';
-        };
-
-        document.getElementById('slider-vol').oninput = (e) => gainNode.gain.value = e.target.value;
-
-        document.getElementById('seek-bar').oninput = (e) => {
-            const wasPlaying = isPlaying;
-            stop();
-            offset = parseFloat(e.target.value);
-            document.getElementById('time-cur').innerText = formatTime(offset);
-            if(wasPlaying) play(offset);
-        };
-
-        document.getElementById('btn-rev').onclick = function() {
-            if(!originalBuffer) return;
-            const wasPlaying = isPlaying;
-            stop();
-            isReverse = !isReverse;
-            this.classList.toggle('bg-rose-600/20', isReverse);
-            this.classList.toggle('text-rose-400', isReverse);
-            
-            const channels = originalBuffer.numberOfChannels;
-            activeBuffer = audioCtx.createBuffer(channels, originalBuffer.length, originalBuffer.sampleRate);
-            for(let i=0; i<channels; i++) {
-                const data = originalBuffer.getChannelData(i);
-                const revData = activeBuffer.getChannelData(i);
-                if(isReverse) {
-                    for(let j=0; j<data.length; j++) revData[j] = data[data.length - 1 - j];
-                } else {
-                    revData.set(data);
-                }
-            }
-            offset = 0;
-            if(wasPlaying) play(0);
-        };
-
-        // --- EXPORTAÇÃO IMEDIATA MP3 ---
-        document.getElementById('btn-export').onclick = async function() {
-            if(!activeBuffer) return;
-            showLoader(true, "Exportando MP3...");
-            
-            const duration = activeBuffer.duration / speed;
-            const offline = new OfflineAudioContext(2, Math.floor(activeBuffer.sampleRate * duration), activeBuffer.sampleRate);
-            const s = offline.createBufferSource();
-            s.buffer = activeBuffer;
-            s.playbackRate.value = speed;
-            s.detune.value = (pitch - 1) * 1200;
-            
-            const b = offline.createBiquadFilter();
-            b.type = 'lowshelf'; b.frequency.value = 200; b.gain.value = bassNode.gain.value;
-            
-            s.connect(b).connect(offline.destination);
-            s.start(0);
-            const rendered = await offline.startRendering();
-
-            // Cálculo do Bitrate Inteligente
-            const originalSize = playlist[currentIdx].size;
-            const targetBytes = Math.max(1024 * 10, originalSize - (30 * 1024));
-            let targetKbps = Math.floor((targetBytes * 8) / duration / 1000);
-            const bitrates = [32, 48, 64, 96, 128, 160, 192, 256, 320];
-            targetKbps = bitrates.reduce((p, c) => Math.abs(c - targetKbps) < Math.abs(p - targetKbps) ? c : p);
-
-            const mp3encoder = new lamejs.Mp3Encoder(2, rendered.sampleRate, targetKbps);
-            const mp3Data = [];
-            const left = fTo16(rendered.getChannelData(0));
-            const right = fTo16(rendered.getChannelData(1));
-            const step = 1152;
-
-            for (let i = 0; i < left.length; i += step) {
-                const l = left.subarray(i, i + step);
-                const r = right.subarray(i, i + step);
-                const buf = mp3encoder.encodeBuffer(l, r);
-                if (buf.length > 0) mp3Data.push(buf);
-            }
-            const flush = mp3encoder.flush();
-            if (flush.length > 0) mp3Data.push(flush);
-
-            const blob = new Blob(mp3Data, { type: 'audio/mp3' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `remix_${Date.now()}.mp3`;
-            a.click();
-            showLoader(false);
-        };
-
-        function fTo16(buf) {
-            const res = new Int16Array(buf.length);
-            for(let i=0; i<buf.length; i++) {
-                let s = Math.max(-1, Math.min(1, buf[i]));
-                res[i] = s < 0 ? s * 32768 : s * 32767;
-            }
-            return res;
+        function checkSecret() { if(++secretClicks >= 10) { document.getElementById('game-panel').classList.add('active'); secretClicks=0; } }
+        function closeGame() { document.getElementById('game-panel').classList.remove('active'); }
+        function gameAction(action) {
+            const frame = document.getElementById('game-frame');
+            if(action === 'back') frame.contentWindow.history.back();
+            if(action === 'refresh') frame.src = frame.src;
         }
 
-        // --- UTILIDADES ---
-        function toggleTheme() {
-            document.body.classList.toggle('day-mode');
-            const isDay = document.body.classList.contains('day-mode');
-            document.getElementById('theme-icon').setAttribute('data-lucide', isDay ? 'sun' : 'moon');
-            lucide.createIcons();
-        }
-
-        document.getElementById('color-picker').oninput = (e) => {
-            const color = e.target.value;
-            document.body.style.backgroundColor = color;
-            document.body.style.setProperty('--theme-bg', color);
-            document.getElementById('preview-box').style.backgroundColor = color;
-        };
-
-        function checkSecret() { if(++secretClicks >= 12) { document.getElementById('game-panel').classList.remove('hidden-game'); secretClicks = 0; } }
-        function closeGame() { document.getElementById('game-panel').classList.add('hidden-game'); }
-        function reloadGame() { const f = document.getElementById('game-frame'); f.src = f.src; }
-        function showLoader(s, t) { document.getElementById('loader').classList.toggle('hidden', !s); document.getElementById('loader-text').innerText = t; }
-
+        function showLoader(s) { document.getElementById('loader').classList.toggle('hidden', !s); }
         window.onload = () => lucide.createIcons();
     </script>
 </body>
 </html>
+
